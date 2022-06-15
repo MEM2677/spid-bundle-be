@@ -41,9 +41,13 @@ public class KeycloakConfigService {
         String username = envVars.get("KEYCLOACK_USERNAME"); // "entando_keycloak_admin"; //
         String password = envVars.get("KEYCLOACK_PASSWORD");
 
+        if (!enabled) {
+            logger.warn("Aborting Keycloak configuration as requested");
+            return;
+        }
         try {
-            ConnectionInfo connection = new ConnectionInfo("https://forumpa.apps.psdemo.eng-entando.com");
-            connection.setLogin("entando_keycloak_admin", "665cfca32b1640c7");
+            ConnectionInfo connection = new ConnectionInfo(host);
+            connection.setLogin(username, password);
 
             Token token = getAdminToken(connection);
 
@@ -126,7 +130,6 @@ public class KeycloakConfigService {
                 }
             }
             logger.info("identity provider [{}] successfully configured", KEYCLOAK_IDP_DISPLAY_NAME);
-            logger.info("Host [{}] configuration complete", host);
         } catch (Throwable t) {
             logger.error("unexpected error in configureKeycloak", t);
         }
