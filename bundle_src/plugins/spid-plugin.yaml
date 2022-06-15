@@ -1,0 +1,7 @@
+descriptorVersion: v4
+image: jangalian/spid:0.0.1-SNAPSHOT
+dbms: postgresql
+healthCheckPath: "/management/health"
+roles:
+  - "spid-admin"
+

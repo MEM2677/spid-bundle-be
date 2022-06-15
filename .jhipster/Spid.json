@@ -1,0 +1,19 @@
+{
+  "microserviceName": "spid",
+  "clientRootFolder": "spid",
+  "databaseType": "sql",
+  "fields": [
+    {
+      "fieldName": "config",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [],
+  "service": "serviceImpl",
+  "dto": "no",
+  "jpaMetamodelFiltering": true,
+  "readOnly": false,
+  "pagination": "infinite-scroll",
+  "name": "Spid",
+  "changelogDate": "20220615125548"
+}

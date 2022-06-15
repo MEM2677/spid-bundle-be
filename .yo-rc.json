@@ -51,6 +51,9 @@
     "nativeLanguage": "it",
     "jwtSecretKey": "MDZhYTU5OGRiZjRmMjg1NGEwZTZkMzYwZWNmNjI4ODE1OTJmODNjOGIwYWYyY2U0NWFkOTBmMTA2MDBhZDZmNTJkYTViZGQ2MzIxNjkxYmU0NGNjMjczYzQyNjBmMzk0ODhhYzg4MTY0NTcxMDk0NmZhZjBjNGZjMGNkMjBlZDk=",
     "languages": ["it"],
-    "enableGradleEnterprise": false
+    "enableGradleEnterprise": false,
+    "lastLiquibaseTimestamp": 1655297748000,
+    "entities": ["Spid"],
+    "generateMfeForEntity": true
   }
 }
