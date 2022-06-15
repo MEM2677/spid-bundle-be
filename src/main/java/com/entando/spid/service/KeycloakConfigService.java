@@ -26,6 +26,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+
+import static com.entando.spid.Constants.*;
+
 @Component
 public class KeycloakConfigService {
 
@@ -73,11 +80,8 @@ public class KeycloakConfigService {
             }
             // 3 - get the id of the newly created execution
             executions = getExecutions(host, token);
-            if (
-                executions == null ||
-                executions.length == 0 ||
-                !executions[executions.length - 1].getDisplayName().equals(KEYCLOAK_EXECUTION_EXPECTED_DISPLAY_NAME)
-            ) {
+            if (executions == null || executions.length == 0
+                || !executions[executions.length - 1].getDisplayName().equals(KEYCLOAK_EXECUTION_EXPECTED_DISPLAY_NAME)) {
                 logger.error("could not obtain the execution for the flow, aborting configuration");
                 return false;
             }
@@ -128,6 +132,7 @@ public class KeycloakConfigService {
                 }
             }
             logger.info("identity provider [{}] successfully configured", KEYCLOAK_IDP_DISPLAY_NAME);
+            logger.info("Host [{}] configuration complete", host);
         } catch (Throwable t) {
             logger.error("unexpected error in configureKeycloak", t);
         }
@@ -161,10 +166,18 @@ public class KeycloakConfigService {
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .accept(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromFormData(body))
-                    //                .retrieve()
-                    //                .bodyToMono(Token.class)
-                    //                .block();
-                    .exchangeToMono(result -> )
+//                .retrieve()
+//                .bodyToMono(Token.class)
+//                .block();
+                    .exchangeToMono(result -> {
+                        if (result.statusCode()
+                            .equals(HttpStatus.OK)) {
+                            return result.bodyToMono(Token.class);
+                        } else {
+                            logger.error("Unexpected status: {}" , result.statusCode());
+                            return Mono.empty();
+                        }
+                    })
                     .block();
         } catch (Throwable t) {
             logger.error("error getting the admin access token", t);
@@ -196,7 +209,15 @@ public class KeycloakConfigService {
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(payload))
-                    .exchangeToMono(result -> )
+                    .exchangeToMono(result -> {
+                        if (result.statusCode()
+                            .equals(HttpStatus.CREATED)) {
+                            return Mono.just(true);
+                        } else {
+                            logger.error("Unexpected status: {}" , result.statusCode());
+                            return Mono.just(false);
+                        }
+                    })
                     .block();
         } catch (Throwable t) {
             logger.error("error in duplicateAuthFlow", t);
@@ -211,14 +232,7 @@ public class KeycloakConfigService {
      * @return
      */
     protected boolean addExecutable(String host, Token token) {
-        final String REST_URI = encodePath(
-            host +
-            "/auth/admin/realms/" +
-            KEYCLOAK_DEFAULT_REALM +
-            "/authentication/flows/" +
-            KEYCLOAK_EXECUTION_HANDLE_EXISTING_ACCOUNT_NAME +
-            "/executions/execution"
-        );
+        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_EXECUTION_HANDLE_EXISTING_ACCOUNT_NAME + "/executions/execution");
         WebClient client = WebClient.create();
         // for a simple payload there's no need to disturb Jackson
         String payload = "{\"provider\":\"idp-auto-link\"}";
@@ -233,7 +247,15 @@ public class KeycloakConfigService {
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(payload))
-                    .exchangeToMono(result -> )
+                    .exchangeToMono(result -> {
+                        if (result.statusCode()
+                            .equals(HttpStatus.CREATED)) {
+                            return Mono.just(true);
+                        } else {
+                            logger.error("Unexpected status: {}" , result.statusCode());
+                            return Mono.just(false);
+                        }
+                    })
                     .block();
         } catch (Throwable t) {
             logger.error("error in duplicateAuthFlow", t);
@@ -261,7 +283,15 @@ public class KeycloakConfigService {
                     .uri(new URI(REST_URI))
                     .header("Authorization", "Bearer " + token.getAccessToken())
                     .accept(MediaType.APPLICATION_JSON)
-                    .exchangeToMono(result -> )
+                    .exchangeToMono(result -> {
+                        if (result.statusCode()
+                            .equals(HttpStatus.OK)) {
+                            return result.bodyToMono(Execution[].class);
+                        } else {
+                            logger.error("Unexpected status: {}" , result.statusCode());
+                            return Mono.empty();
+                        }
+                    })
                     .block();
         } catch (Throwable t) {
             logger.error("error in getExecutions", t);
@@ -289,7 +319,15 @@ public class KeycloakConfigService {
                     .post()
                     .uri(new URI(REST_URI))
                     .header("Authorization", "Bearer " + token.getAccessToken())
-                    .exchangeToMono(result -> )
+                    .exchangeToMono(result -> {
+                        if (result.statusCode()
+                            .equals(HttpStatus.NO_CONTENT)) {
+                            return Mono.just(true);
+                        } else {
+                            logger.error("Unexpected status: {}" , result.statusCode());
+                            return Mono.just(false);
+                        }
+                    })
                     .block();
         } catch (Throwable t) {
             logger.error("error in raiseExecutionPriority", t);
@@ -306,13 +344,7 @@ public class KeycloakConfigService {
      * @param requirement
      * @return
      */
-    protected boolean updateExecutionRequirement(
-        String host,
-        Token token,
-        Execution[] executions,
-        String executionName,
-        String requirement
-    ) {
+    protected boolean updateExecutionRequirement(String host, Token token, Execution[] executions, String executionName, String requirement) {
         AuthenticationFlow updated = null;
         Optional<Execution> execOpt = findExecution(executions, executionName);
 
@@ -349,7 +381,15 @@ public class KeycloakConfigService {
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(execution))
-                    .exchangeToMono(result -> )
+                    .exchangeToMono(result -> {
+                        if (result.statusCode()
+                            .equals(HttpStatus.ACCEPTED)) {
+                            return result.bodyToMono(AuthenticationFlow.class);
+                        } else {
+                            logger.error("Unexpected status: {}" , result.statusCode());
+                            return Mono.empty();
+                        }
+                    })
                     .block();
         } catch (Throwable t) {
             logger.error("error in updateExecution", t);
@@ -377,7 +417,15 @@ public class KeycloakConfigService {
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(idp))
-                    .exchangeToMono(result -> )
+                    .exchangeToMono(result -> {
+                        if (result.statusCode()
+                            .equals(HttpStatus.CREATED)) {
+                            return Mono.just(true);
+                        } else {
+                            logger.error("Unexpected status: {}" , result.statusCode());
+                            return Mono.just(false);
+                        }
+                    })
                     .block();
         } catch (Throwable t) {
             logger.error("error in createIdentityProvider", t);
@@ -426,7 +474,15 @@ public class KeycloakConfigService {
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(payload))
-                    .exchangeToMono(result -> )
+                    .exchangeToMono(result -> {
+                        if (result.statusCode()
+                            .equals(HttpStatus.CREATED)) {
+                            return Mono.just(true);
+                        } else {
+                            logger.error("Unexpected status: {}" , result.statusCode());
+                            return Mono.just(false);
+                        }
+                    })
                     .block();
         } catch (Throwable t) {
             logger.error("error in addMapperElement", t);
@@ -457,28 +513,28 @@ public class KeycloakConfigService {
     // templates for mappers
     private static String USERNAME_MAPPER_CFG =
         "{\n" +
-        "   \"identityProviderAlias\":\"" +
-        KEYCLOAK_IDP_ALIAS +
-        "\",\n" +
-        "   \"config\":{\n" +
-        "      \"syncMode\":\"INHERIT\",\n" +
-        "      \"template\":\"${ATTRIBUTE.fiscalNumber}\"\n" +
-        "   },\n" +
-        "   \"name\":\"User Name\",\n" +
-        "   \"identityProviderMapper\":\"spid-saml-username-idp-mapper\"\n" +
-        "}";
+            "   \"identityProviderAlias\":\"" +
+            KEYCLOAK_IDP_ALIAS +
+            "\",\n" +
+            "   \"config\":{\n" +
+            "      \"syncMode\":\"INHERIT\",\n" +
+            "      \"template\":\"${ATTRIBUTE.fiscalNumber}\"\n" +
+            "   },\n" +
+            "   \"name\":\"User Name\",\n" +
+            "   \"identityProviderMapper\":\"spid-saml-username-idp-mapper\"\n" +
+            "}";
 
     private static String ATTRIBUTE_MAPPER_CFG =
         "{\n" +
-        "   \"identityProviderAlias\":\"" +
-        KEYCLOAK_IDP_ALIAS +
-        "\",\n" +
-        "   \"config\":{\n" +
-        "      \"syncMode\":\"INHERIT\",\n" +
-        "      \"attribute.name\":\"_ATTRIBUTE_NAME_\",\n" +
-        "      \"user.attribute\":\"_USER_ATTRIBUTE_\"\n" +
-        "   },\n" +
-        "   \"name\":\"_NAME_\",\n" +
-        "   \"identityProviderMapper\":\"spid-user-attribute-idp-mapper\"\n" +
-        "}";
+            "   \"identityProviderAlias\":\"" +
+            KEYCLOAK_IDP_ALIAS +
+            "\",\n" +
+            "   \"config\":{\n" +
+            "      \"syncMode\":\"INHERIT\",\n" +
+            "      \"attribute.name\":\"_ATTRIBUTE_NAME_\",\n" +
+            "      \"user.attribute\":\"_USER_ATTRIBUTE_\"\n" +
+            "   },\n" +
+            "   \"name\":\"_NAME_\",\n" +
+            "   \"identityProviderMapper\":\"spid-user-attribute-idp-mapper\"\n" +
+            "}";
 }
