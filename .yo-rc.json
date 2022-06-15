@@ -1,0 +1,56 @@
+{
+  "generator-jhipster": {
+    "blueprints": [
+      {
+        "name": "generator-jhipster-entando",
+        "version": "7.0.1"
+      }
+    ],
+    "otherModules": [
+      {
+        "name": "generator-jhipster-entando",
+        "version": "7.0.1"
+      }
+    ],
+    "applicationType": "microservice",
+    "baseName": "spid",
+    "jhipsterVersion": "7.2.0",
+    "skipClient": true,
+    "withAdminUi": false,
+    "skipUserManagement": true,
+    "skipServer": false,
+    "skipCheckLengthOfIdentifier": false,
+    "skipFakeData": false,
+    "jhiPrefix": "jhi",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "testFrameworks": [],
+    "pages": [],
+    "creationTimestamp": 1655297467896,
+    "serviceDiscoveryType": false,
+    "reactive": false,
+    "authenticationType": "oauth2",
+    "packageName": "com.entando.spid",
+    "serverPort": "8081",
+    "cacheProvider": "caffeine",
+    "enableHibernateCache": true,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "prodDatabaseType": "postgresql",
+    "buildTool": "maven",
+    "serverSideOptions": [],
+    "websocket": false,
+    "searchEngine": false,
+    "messageBroker": false,
+    "enableSwaggerCodegen": false,
+    "microserviceDependencies": "entando",
+    "bundleName": "spid-bundle",
+    "dockerImageOrganization": "jangalian",
+    "generateMicroFrontends": "always",
+    "enableTranslation": true,
+    "nativeLanguage": "it",
+    "jwtSecretKey": "MDZhYTU5OGRiZjRmMjg1NGEwZTZkMzYwZWNmNjI4ODE1OTJmODNjOGIwYWYyY2U0NWFkOTBmMTA2MDBhZDZmNTJkYTViZGQ2MzIxNjkxYmU0NGNjMjczYzQyNjBmMzk0ODhhYzg4MTY0NTcxMDk0NmZhZjBjNGZjMGNkMjBlZDk=",
+    "languages": ["it"],
+    "enableGradleEnterprise": false
+  }
+}
