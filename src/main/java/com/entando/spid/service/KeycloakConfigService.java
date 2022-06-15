@@ -1,7 +1,5 @@
 package com.entando.spid.service;
 
-import static com.entando.spid.Constants.*;
-
 import com.entando.spid.domain.keycloak.AuthenticationFlow;
 import com.entando.spid.domain.keycloak.Execution;
 import com.entando.spid.domain.keycloak.IdentityProvider;
@@ -9,10 +7,6 @@ import com.entando.spid.domain.keycloak.Token;
 import com.entando.spid.service.dto.ConnectionInfo;
 import com.entando.spid.service.dto.MapperAttribute;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
