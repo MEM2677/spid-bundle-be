@@ -157,7 +157,6 @@ public interface Constants {
     public final String PUBLIC_TEST_IdP = "{\n" +
         "    \"alias\": \"" + KEYCLOAK_IDP_ALIAS + "\",\n" +
         "    \"displayName\": \"" + KEYCLOAK_IDP_DISPLAY_NAME + "\",\n" +
-        "    \"internalId\": \"011c441d-87c7-4dc0-b2d8-d72a32d112e0\",\n" +
         "    \"providerId\": \"spid\",\n" +
         "    \"enabled\": true,\n" +
         "    \"updateProfileFirstLoginMode\": \"on\",\n" +
