@@ -7,6 +7,7 @@ import com.entando.spid.domain.keycloak.Token;
 import com.entando.spid.service.dto.ConnectionInfo;
 import com.entando.spid.service.dto.MapperAttribute;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -37,15 +38,24 @@ public class KeycloakConfigService {
         Map<String, String> envVars = System.getenv();
 
         Boolean enabled = Boolean.parseBoolean(envVars.get("SPID_CONFIG_ACTIVE"));
-        String host = envVars.get("KEYCLOACK_HOST"); // "https://forumpa.apps.psdemo.eng-entando.com"; //
-        String username = envVars.get("KEYCLOACK_USERNAME"); // "entando_keycloak_admin"; //
-        String password = envVars.get("KEYCLOACK_PASSWORD");
+        String host = envVars.get("DEFAULT_SSO_IN_NAMESPACE_SERVICE_PORT_8080_TCP_ADDR");
+        String port = envVars.get("DEFAULT_SSO_IN_NAMESPACE_SERVICE_SERVICE_PORT");
+        String proto = envVars.get("KEYCLOAK_PROTO");
+        String username = envVars.get("KEYCLOAK_USERNAME");
+        String password = envVars.get("KEYCLOAK_PASSWORD");
 
         if (!enabled) {
             logger.warn("Aborting Keycloak configuration as requested");
             return;
         }
         try {
+            if (StringUtils.isBlank(proto)) {
+                proto = DEFAULT_PROTO;
+            }
+            host = proto + "://" + host;
+            if (StringUtils.isNotBlank(port)) {
+                host = host + ":" + port;
+            }
             ConnectionInfo connection = new ConnectionInfo(host);
             connection.setLogin(username, password);
 
@@ -156,8 +166,7 @@ public class KeycloakConfigService {
 
         try {
             token =
-                client
-                    .post()
+                client.post()
                     .uri(new URI(REST_URI))
                     //                .header("Authorization", "Bearer MY_SECRET_TOKEN")
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -198,9 +207,7 @@ public class KeycloakConfigService {
         WebClient client = WebClient.create();
 
         try {
-            created =
-                client
-                    .post()
+            created = client.post()
                     .uri(new URI(REST_URI))
                     .header("Authorization", "Bearer " + token.getAccessToken())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -236,9 +243,7 @@ public class KeycloakConfigService {
         Boolean created = false;
 
         try {
-            created =
-                client
-                    .post()
+            created = client.post()
                     .uri(new URI(REST_URI))
                     .header("Authorization", "Bearer " + token.getAccessToken())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -274,8 +279,7 @@ public class KeycloakConfigService {
         WebClient client = WebClient.create();
 
         try {
-            executions =
-                (Execution[]) client
+            executions = (Execution[]) client
                     .get()
                     .uri(new URI(REST_URI))
                     .header("Authorization", "Bearer " + token.getAccessToken())

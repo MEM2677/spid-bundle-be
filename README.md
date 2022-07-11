@@ -1,9 +1,94 @@
-# spid
+# SPID bundle
+
+This bundle, in its first release, configures Keycloak to use Italian SPID identity provider.
+SPID (Sistema Pubblico di Identità Digitale) is a system used by Public Administrations and provate subject
+to authenticate a given user.
+
+
+**NOTE:** in this first release we are targeting the public [SPID test server](https://demo.spid.gov.it/#/login), however you can easily change the configuration
+to add new desired providers.
+
+This PBC let **Entando 7** to be certified as SPID Service Provider
+
+**NOTE:** installing the PBC alone is not sufficient to start the accreditation process: be sure to read the [technical
+documentation](https://docs.italia.it/italia/spid/spid-regole-tecniche/it/stabile/index.html) first and then the whole [certification procedure](https://www.spid.gov.it/cos-e-spid/diventa-fornitore-di-servizi/).
+
+## Prerequisites
+
+Before installing the bundle in your Entando 7 installation, a few operations must be carried out by the devOps / sysOps of the cluster.
+
+These operations include:
+- copy of the provider JAR into Keycloak pod
+- creation of the secrets
+- configure the bundle
+
+The first two steps must be performed by the sysOps or devOps, the last one can be done by a developer.
+
+### Install the SPID provider in keycloak
+
+Locate the pod containing the Keycloak installation: in a standard installation the name of the pod always start with **default-sso-in-namespace-deployment**
+
+Alternatively you can use the following command from Mac / Linux terminal:
+
+```shell
+kubectl get po -n <NAMESPACE> | grep default-sso-in-namespace-deployment | head -n1 | cut -d " " -f1
+````
+where NAMESPACE is the namespace where Entando was installed to.
+
+Copy the spid-provider.jar into the Keycloak pod with the command
+
+```shell
+kubectl spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/jboss/keycloak/standalone/deployments
+```
+
+where `default-sso-in-namespace-deployment-aaabbbccc-dddee` is the name of the Keycloak pod
+
+You have to wait a few instants to let Keycloak sense the new provider and install it.  
+The result of this operation is to add a new identity
+provider, **SPID**, to the list of those already available. This provider will be configured automatically when the bundle is installed.
+For this reason installing the bundle without these preliminary step will result in an error.
+
+### Prepare secrets
+
+Secrets are a means of transport of sensible information to the bundle, so to let it perform various setup operations.
+This information is the username and password of a Keycloak user with the privilege to execute setup operations.
+
+**NOTE:** the creation of the secrets must be done only once and repeated only when the Git repository of the bundle changes.
+
+As specified in the [documentation](https://developer.entando.com/next/tutorials/devops/plugin-environment-variables.html) the secrets bound to a bundle
+must have specific names starting with the bundle ID.  
+To obtain the bundle ID execute the following command:
+
+```shell
+ent ecr get-bundle-id --auto "<MY_REPOSITORY>"
+```
+where <MY_REPOSITORY> is the address of the Git repository containing the bundle (inclusive of the trailing `.git`).
+
+Create the secret for username and password with the following commands
+
+```shell
+kubectl create secret generic <BUNDLE_ID>-sso-admin-username --from-literal=username=<USERNAME> -n <NAMESPACE>
+
+kubectl create secret generic <BUNDLE_ID>-sso-admin-password --from-literal=password=<PASSWORD> -n <NAMESPACE>
+
+```
+
+with NAMESPACE being the namespace where Entando is installed, USERNAME and PASSWORD the values of the Keycloak account and
+BUNDLE_ID the bundle ID found in the previous step.
+
+### Configure the bundle
+
+IN the last step the developer makes sure the plugin deployer file is well configured, typically making sure that the correct
+secrets are referenced.
 
 This application was generated using JHipster 7.2.0, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v7.2.0](https://www.jhipster.tech/documentation-archive/v7.2.0).
 
 This is a "microservice" application intended to be part of a microservice architecture, please refer to the [Doing microservices with JHipster][] page of the documentation for more information.
 This application is configured for Service Discovery and Configuration with . On launch, it will refuse to start if it is not able to connect to .
+
+
+
+
 
 ## Development
 
