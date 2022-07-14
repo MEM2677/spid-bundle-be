@@ -48,7 +48,7 @@ The result of this operation is to add a new identity
 provider, **SPID**, to the list of those already available. This provider will be configured automatically when the bundle is installed.
 For this reason installing the bundle without these preliminary step will result in an error.
 
-### Prepare secrets
+### Prepare secret
 
 Secrets are a means of transport of sensible information to the bundle, so to let it perform various setup operations.
 This information is the username and password of a Keycloak user with the privilege to execute setup operations.

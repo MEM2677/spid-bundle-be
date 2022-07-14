@@ -1,6 +1,7 @@
 package com.entando.spid.service;
 
 import com.entando.spid.domain.keycloak.AuthenticationFlow;
+import com.entando.spid.domain.keycloak.Client;
 import com.entando.spid.domain.keycloak.Execution;
 import com.entando.spid.domain.keycloak.IdentityProvider;
 import com.entando.spid.domain.keycloak.Token;
@@ -33,16 +34,24 @@ public class KeycloakConfigService {
 
     private final Logger logger = LoggerFactory.getLogger(KeycloakConfigService.class);
 
+
     @Scheduled(fixedRate = Long.MAX_VALUE, initialDelay = 2000)
     public void configure() {
         Map<String, String> envVars = System.getenv();
 
-        Boolean enabled = Boolean.parseBoolean(envVars.get("SPID_CONFIG_ACTIVE"));
+        boolean enabled = Boolean.parseBoolean(envVars.get("SPID_CONFIG_ACTIVE"));
         String host = envVars.get("DEFAULT_SSO_IN_NAMESPACE_SERVICE_PORT_8080_TCP_ADDR");
         String port = envVars.get("DEFAULT_SSO_IN_NAMESPACE_SERVICE_SERVICE_PORT");
         String proto = envVars.get("KEYCLOAK_PROTO");
-        String username = envVars.get("KEYCLOAK_USERNAME");
-        String password = envVars.get("KEYCLOAK_PASSWORD");
+        String password = envVars.get("KEYCLOAK_CLIENT_SECRET");
+        String clientName = envVars.get("ENTANDO_APP_NAME");
+
+        if (StringUtils.isBlank(clientName)) {
+            clientName = envVars.get("KEYCLOAK_SPID_CLIENT_ID");
+            if (StringUtils.isBlank(clientName)) {
+                clientName = guessAppName(envVars);
+            }
+        }
 
         if (!enabled) {
             logger.warn("Aborting Keycloak configuration as requested");
@@ -53,26 +62,59 @@ public class KeycloakConfigService {
                 proto = DEFAULT_PROTO;
             }
             host = proto + "://" + host;
-            if (StringUtils.isNotBlank(port)) {
+            if (StringUtils.isNotBlank(port) && !port.equals("80")) {
                 host = host + ":" + port;
             }
             ConnectionInfo connection = new ConnectionInfo(host);
-            connection.setLogin(username, password);
+            connection.setLogin(clientName, password);
+            Token token = getServiceAccountToken(connection);
 
-            Token token = getAdminToken(connection);
-
-            if (configureKeycloak(connection, token)) {
+            if (token != null && configureKeycloak(connection, token)) {
                 logger.info("Host [{}] configuration complete", host);
             } else {
                 logger.error("Host [{}] configuration failed", host);
             }
         } catch (Throwable t) {
-            throw new RuntimeException(t);
+            logger.error("Unexpected error", t);
         }
+    }
+
+    private Client findClient(Client[] clients, String id) {
+        if (clients != null) {
+            // find the entando-web
+            Optional<Client> client = Arrays.stream(clients)
+                .filter(c -> c.getClientId().equals(id))
+                .findFirst();
+            if (client.isPresent()) {
+                return client.get();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Try to guess the app name == client name on Keycloak
+     * @param env
+     * @return
+     */
+    protected String guessAppName(Map<String, String> env) {
+        Optional<String> name = env
+            .keySet()
+            .stream()
+            .filter(k -> k.endsWith("_CM_SERVICE_PORT_8083_TCP_ADDR"))
+            .findFirst()
+            .map(k -> k.replaceFirst("_CM_SERVICE_PORT_8083_TCP_ADDR", "").toLowerCase());
+        // retain Java 8 compilation level
+        return name.orElse(null);
     }
 
     protected boolean configureKeycloak(ConnectionInfo info, Token token) {
         Execution[] executions;
+        Map<String, String> envVars = System.getenv();
+
+        String doJwtMap = envVars.get("KEYCLOAK_MAP_JWT");
+        boolean mapJwt = StringUtils.isNotBlank(doJwtMap) && Boolean.parseBoolean(doJwtMap);
+
         try {
             String host = info.getHost();
             // 1 - configure authentication flow
@@ -94,7 +136,7 @@ public class KeycloakConfigService {
                 return false;
             }
             String id = executions[executions.length - 1].getId();
-            logger.debug("Target execution ID is [{}] ");
+            logger.debug("Target execution ID is [{}] ", id);
             //  4 - move executable to its position
             for (int i = 0; i < 2; i++) {
                 if (!raiseExecutionPriority(host, token, id)) {
@@ -139,12 +181,61 @@ public class KeycloakConfigService {
                     return false;
                 }
             }
+            // * create JWT mappings
+            Client[] clients = getClients(host, token, 0);
+            Client client = findClient(clients, ENTANDO_WEB_CLIENT_ID);
+            if (client != null) {
+                String clientId = client.getId();
+
+                logger.debug("Creating JWT mappings for client {}", clientId);
+                for (MapperAttribute attr: KEYCLOAK_IDP_MAPPING) {
+                    if (!createJwtMaping(host, token, clientId, attr)) {
+                        logger.error("Could not create JWT mapping for attribute {}", attr.getAttributeName());
+                        return false;
+                    }
+                }
+                logger.info("JWT mappings created");
+            }
             logger.info("identity provider [{}] successfully configured", KEYCLOAK_IDP_DISPLAY_NAME);
         } catch (Throwable t) {
             logger.error("unexpected error in configureKeycloak", t);
         }
         return true;
     }
+
+    protected Token getServiceAccountToken(ConnectionInfo connection) {
+        Token token = null;
+        WebClient client = WebClient.create();
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        final String REST_URI = connection.getHost() + "/auth/realms/" + KEYCLOAK_DEFAULT_REALM + "/protocol/openid-connect/token";
+
+        body.add("client_id", connection.getCLientId());
+        body.add("client_secret", connection.getClientSecret());
+        body.add("grant_type", "client_credentials");
+
+        try {
+            token =
+                client.post()
+                    .uri(new URI(REST_URI))
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(BodyInserters.fromFormData(body))
+                    .exchangeToMono(result -> {
+                        if (result.statusCode()
+                            .equals(HttpStatus.OK)) {
+                            return result.bodyToMono(Token.class);
+                        } else {
+                            logger.error("Unexpected status: {}" , result.statusCode());
+                            return Mono.empty();
+                        }
+                    })
+                    .block();
+        } catch (Throwable t) {
+            logger.error("error getting the admin access token", t);
+        }
+        return token;
+    }
+
 
     /**
      *
@@ -198,9 +289,7 @@ public class KeycloakConfigService {
      * @return
      */
     protected boolean duplicateAuthFlow(String host, Token token) {
-        final String REST_URI = encodePath(
-            host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_DEFAULT_AUTH_FLOW + "/copy"
-        );
+        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_DEFAULT_AUTH_FLOW + "/copy");
         // for a simple payload there's no need to disturb Jackson
         String payload = "{\"newName\":\"" + KEYCLOAK_NEW_AUTH_FLOW_NAME + "\"}";
         Boolean created = false;
@@ -273,9 +362,7 @@ public class KeycloakConfigService {
      */
     protected Execution[] getExecutions(String host, Token token) {
         Execution[] executions = null;
-        final String REST_URI = encodePath(
-            host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_NEW_AUTH_FLOW_NAME + "/executions"
-        );
+        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_NEW_AUTH_FLOW_NAME + "/executions");
         WebClient client = WebClient.create();
 
         try {
@@ -308,9 +395,7 @@ public class KeycloakConfigService {
      * @return
      */
     protected boolean raiseExecutionPriority(String host, Token token, String id) {
-        final String REST_URI = encodePath(
-            host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/executions/" + id + "/raise-priority"
-        );
+        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/executions/" + id + "/raise-priority");
         WebClient client = WebClient.create();
         Boolean success = true;
 
@@ -367,9 +452,7 @@ public class KeycloakConfigService {
      * @return
      */
     protected AuthenticationFlow updateExecution(String host, Token token, Execution execution) {
-        final String REST_URI = encodePath(
-            host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_NEW_AUTH_FLOW_NAME + "/executions"
-        );
+        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_NEW_AUTH_FLOW_NAME + "/executions");
         AuthenticationFlow flow = null;
         WebClient client = WebClient.create();
 
@@ -460,9 +543,7 @@ public class KeycloakConfigService {
      * @return
      */
     private boolean addMapperElement(String host, Token token, String payload) {
-        final String REST_URI = encodePath(
-            host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/identity-provider/instances/" + KEYCLOAK_IDP_ALIAS + "/mappers"
-        );
+        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/identity-provider/instances/" + KEYCLOAK_IDP_ALIAS + "/mappers");
         Boolean created = false;
         WebClient client = WebClient.create();
 
@@ -489,6 +570,68 @@ public class KeycloakConfigService {
             logger.error("error in addMapperElement", t);
         }
         return created;
+    }
+
+    protected Client[] getClients(String host, Token token, int start) {
+        Client[] clients = null;
+        final String REST_URI = host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/clients?first=" + start + "&max=20";
+        WebClient client = WebClient.create();
+
+        try {
+            clients = client
+                .get()
+                .uri(new URI(REST_URI))
+                .header("Authorization", "Bearer " + token.getAccessToken())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchangeToMono(result -> {
+                    if (result.statusCode()
+                        .equals(HttpStatus.OK)) {
+                        return result.bodyToMono(Client[].class);
+                    } else {
+                        logger.error("Unexpected status: {}" , result.statusCode());
+                        return Mono.empty();
+                    }
+                })
+                .block();
+        } catch (Throwable t) {
+            logger.error("error in getExecutions", t);
+        }
+        return clients;
+    }
+
+    protected boolean createJwtMaping(String host, Token token, String clientId, String payload) {
+        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/clients/" + clientId + "/protocol-mappers/models");
+        WebClient client = WebClient.create();
+        Boolean created = false;
+
+        try {
+            created =
+                client.post()
+                    .uri(new URI(REST_URI))
+                    .header("Authorization", "Bearer " + token.getAccessToken())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(BodyInserters.fromValue(payload))
+                    .exchangeToMono(result -> {
+                        if (result.statusCode()
+                            .equals(HttpStatus.CREATED)) {
+                            return Mono.just(true);
+                        } else {
+                            logger.error("Unexpected status: {}" , result.statusCode());
+                            return Mono.just(false);
+                        }
+                    })
+                    .block();
+        } catch (Throwable t) {
+            logger.error("error in updateExecution", t);
+        }
+        return created;
+    }
+
+    protected boolean createJwtMaping(String host, Token token, String clientId, MapperAttribute attribute) {
+        String payload = JWT_MAPPER_ATTRIBUTE
+            .replace("_ATTRIBUTE_NAME_", attribute.getAttributeName());
+        return  createJwtMaping(host, token, clientId, payload);
     }
 
     /**
@@ -538,4 +681,20 @@ public class KeycloakConfigService {
             "   \"name\":\"_NAME_\",\n" +
             "   \"identityProviderMapper\":\"spid-user-attribute-idp-mapper\"\n" +
             "}";
+
+    private static String JWT_MAPPER_ATTRIBUTE = "{\n" +
+        "  \"protocol\": \"openid-connect\",\n" +
+        "  \"config\": {\n" +
+        "    \"id.token.claim\": \"false\",\n" +
+        "    \"access.token.claim\": \"true\",\n" +
+        "    \"userinfo.token.claim\": \"true\",\n" +
+        "    \"multivalued\": \"\",\n" +
+        "    \"aggregate.attrs\": \"\",\n" +
+        "    \"jsonType.label\": \"String\",\n" +
+        "    \"user.attribute\": \"_ATTRIBUTE_NAME_\",\n" +
+        "    \"claim.name\": \"spid._ATTRIBUTE_NAME_\"\n" +
+        "  },\n" +
+        "  \"name\": \"spid._ATTRIBUTE_NAME_\",\n" +
+        "  \"protocolMapper\": \"oidc-usermodel-attribute-mapper\"\n" +
+        "}";
 }

@@ -37,8 +37,10 @@ public interface Constants {
     String KEYCLOAK_IDP_DISPLAY_NAME = "SPID Login"; // // EDITABLE, login button text!
     String KEYCLOAK_IDP_ALIAS = "spid-test-pubblico"; // EDITABLE
 
+    String ENTANDO_WEB_CLIENT_ID = "entando-web";
+
     // mapper setup
-    MapperAttribute KEYCLOAK_IDP_MAPPING[] = {
+    MapperAttribute[] KEYCLOAK_IDP_MAPPING = {
         new MapperAttribute("First Name", "name", "firstName"),
         new MapperAttribute("Last Name", "familyName", "lastName"),
         new MapperAttribute("SPID Code", "spidCode", "spid-spidCode"),
