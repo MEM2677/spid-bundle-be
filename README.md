@@ -5,13 +5,13 @@ SPID (Sistema Pubblico di Identità Digitale) is a system used by Public Adminis
 to authenticate a given user.
 
 
-**NOTE:** in this first release we are targeting the public [SPID test server](https://demo.spid.gov.it/#/login), however you can easily change the configuration
+**NOTE:** in this first release we are targeting the public [SPID test server](https://demo.idp.gov.it/#/login), however you can easily change the configuration
 to add new desired providers.
 
 This PBC let **Entando 7** to be certified as SPID Service Provider
 
 **NOTE:** installing the PBC alone is not sufficient to start the accreditation process: be sure to read the [technical
-documentation](https://docs.italia.it/italia/spid/spid-regole-tecniche/it/stabile/index.html) first and then the whole [certification procedure](https://www.spid.gov.it/cos-e-spid/diventa-fornitore-di-servizi/).
+documentation](https://docs.italia.it/italia/idp/idp-regole-tecniche/it/stabile/index.html) first and then the whole [certification procedure](https://www.idp.gov.it/cos-e-idp/diventa-fornitore-di-servizi/).
 
 ## Prerequisites
 
@@ -35,10 +35,10 @@ kubectl get po -n <NAMESPACE> | grep default-sso-in-namespace-deployment | head 
 ````
 where NAMESPACE is the namespace where Entando was installed to.
 
-Copy the spid-provider.jar into the Keycloak pod with the command
+Copy the idp-provider.jar into the Keycloak pod with the command
 
 ```shell
-kubectl spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/jboss/keycloak/standalone/deployments
+kubectl idp-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/jboss/keycloak/standalone/deployments
 ```
 
 where `default-sso-in-namespace-deployment-aaabbbccc-dddee` is the name of the Keycloak pod
@@ -244,7 +244,7 @@ jhipster:
 
 ### Packaging as jar
 
-To build the final jar and optimize the spid application for production, run:
+To build the final jar and optimize the idp application for production, run:
 
 ```
 ./mvnw -Pprod clean verify

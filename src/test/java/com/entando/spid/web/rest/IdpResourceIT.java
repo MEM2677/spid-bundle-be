@@ -7,9 +7,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.entando.spid.IntegrationTest;
-import com.entando.spid.domain.Spid;
-import com.entando.spid.repository.SpidRepository;
-import com.entando.spid.service.criteria.SpidCriteria;
+import com.entando.spid.domain.Idp;
+import com.entando.spid.repository.IdpRepository;
+
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @IntegrationTest
 @AutoConfigureMockMvc
 @WithMockUser
-class SpidResourceIT {
+class IdpResourceIT {
 
     private static final String DEFAULT_CONFIG = "AAAAAAAAAA";
     private static final String UPDATED_CONFIG = "BBBBBBBBBB";
@@ -41,7 +41,7 @@ class SpidResourceIT {
     private static AtomicLong count = new AtomicLong(random.nextInt() + (2 * Integer.MAX_VALUE));
 
     @Autowired
-    private SpidRepository spidRepository;
+    private IdpRepository idpRepository;
 
     @Autowired
     private EntityManager em;
@@ -49,7 +49,7 @@ class SpidResourceIT {
     @Autowired
     private MockMvc restSpidMockMvc;
 
-    private Spid spid;
+    private Idp idp;
 
     /**
      * Create an entity for this test.
@@ -57,9 +57,9 @@ class SpidResourceIT {
      * This is a static method, as tests for other entities might also need it,
      * if they test an entity which requires the current entity.
      */
-    public static Spid createEntity(EntityManager em) {
-        Spid spid = new Spid().config(DEFAULT_CONFIG);
-        return spid;
+    public static Idp createEntity(EntityManager em) {
+        Idp idp = new Idp().config(DEFAULT_CONFIG);
+        return idp;
     }
 
     /**
@@ -68,66 +68,66 @@ class SpidResourceIT {
      * This is a static method, as tests for other entities might also need it,
      * if they test an entity which requires the current entity.
      */
-    public static Spid createUpdatedEntity(EntityManager em) {
-        Spid spid = new Spid().config(UPDATED_CONFIG);
-        return spid;
+    public static Idp createUpdatedEntity(EntityManager em) {
+        Idp idp = new Idp().config(UPDATED_CONFIG);
+        return idp;
     }
 
     @BeforeEach
     public void initTest() {
-        spid = createEntity(em);
+        idp = createEntity(em);
     }
 
     @Test
     @Transactional
     void createSpid() throws Exception {
-        int databaseSizeBeforeCreate = spidRepository.findAll().size();
-        // Create the Spid
+        int databaseSizeBeforeCreate = idpRepository.findAll().size();
+        // Create the Idp
         restSpidMockMvc
             .perform(
-                post(ENTITY_API_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(spid))
+                post(ENTITY_API_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(idp))
             )
             .andExpect(status().isCreated());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeCreate + 1);
-        Spid testSpid = spidList.get(spidList.size() - 1);
-        assertThat(testSpid.getConfig()).isEqualTo(DEFAULT_CONFIG);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeCreate + 1);
+        Idp testIdp = idpList.get(idpList.size() - 1);
+        assertThat(testIdp.getConfig()).isEqualTo(DEFAULT_CONFIG);
     }
 
     @Test
     @Transactional
     void createSpidWithExistingId() throws Exception {
-        // Create the Spid with an existing ID
-        spid.setId(1L);
+        // Create the Idp with an existing ID
+        idp.setId(1L);
 
-        int databaseSizeBeforeCreate = spidRepository.findAll().size();
+        int databaseSizeBeforeCreate = idpRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restSpidMockMvc
             .perform(
-                post(ENTITY_API_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(spid))
+                post(ENTITY_API_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(idp))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeCreate);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeCreate);
     }
 
     @Test
     @Transactional
     void getAllSpids() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
         // Get all the spidList
         restSpidMockMvc
             .perform(get(ENTITY_API_URL + "?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(spid.getId().intValue())))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(idp.getId().intValue())))
             .andExpect(jsonPath("$.[*].config").value(hasItem(DEFAULT_CONFIG)));
     }
 
@@ -135,14 +135,14 @@ class SpidResourceIT {
     @Transactional
     void getSpid() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
-        // Get the spid
+        // Get the idp
         restSpidMockMvc
-            .perform(get(ENTITY_API_URL_ID, spid.getId()))
+            .perform(get(ENTITY_API_URL_ID, idp.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.id").value(spid.getId().intValue()))
+            .andExpect(jsonPath("$.id").value(idp.getId().intValue()))
             .andExpect(jsonPath("$.config").value(DEFAULT_CONFIG));
     }
 
@@ -150,9 +150,9 @@ class SpidResourceIT {
     @Transactional
     void getSpidsByIdFiltering() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
-        Long id = spid.getId();
+        Long id = idp.getId();
 
         defaultSpidShouldBeFound("id.equals=" + id);
         defaultSpidShouldNotBeFound("id.notEquals=" + id);
@@ -168,7 +168,7 @@ class SpidResourceIT {
     @Transactional
     void getAllSpidsByConfigIsEqualToSomething() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
         // Get all the spidList where config equals to DEFAULT_CONFIG
         defaultSpidShouldBeFound("config.equals=" + DEFAULT_CONFIG);
@@ -181,7 +181,7 @@ class SpidResourceIT {
     @Transactional
     void getAllSpidsByConfigIsNotEqualToSomething() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
         // Get all the spidList where config not equals to DEFAULT_CONFIG
         defaultSpidShouldNotBeFound("config.notEquals=" + DEFAULT_CONFIG);
@@ -194,7 +194,7 @@ class SpidResourceIT {
     @Transactional
     void getAllSpidsByConfigIsInShouldWork() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
         // Get all the spidList where config in DEFAULT_CONFIG or UPDATED_CONFIG
         defaultSpidShouldBeFound("config.in=" + DEFAULT_CONFIG + "," + UPDATED_CONFIG);
@@ -207,7 +207,7 @@ class SpidResourceIT {
     @Transactional
     void getAllSpidsByConfigIsNullOrNotNull() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
         // Get all the spidList where config is not null
         defaultSpidShouldBeFound("config.specified=true");
@@ -220,7 +220,7 @@ class SpidResourceIT {
     @Transactional
     void getAllSpidsByConfigContainsSomething() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
         // Get all the spidList where config contains DEFAULT_CONFIG
         defaultSpidShouldBeFound("config.contains=" + DEFAULT_CONFIG);
@@ -233,7 +233,7 @@ class SpidResourceIT {
     @Transactional
     void getAllSpidsByConfigNotContainsSomething() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
         // Get all the spidList where config does not contain DEFAULT_CONFIG
         defaultSpidShouldNotBeFound("config.doesNotContain=" + DEFAULT_CONFIG);
@@ -250,7 +250,7 @@ class SpidResourceIT {
             .perform(get(ENTITY_API_URL + "?sort=id,desc&" + filter))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(spid.getId().intValue())))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(idp.getId().intValue())))
             .andExpect(jsonPath("$.[*].config").value(hasItem(DEFAULT_CONFIG)));
 
         // Check, that the count call also returns 1
@@ -283,7 +283,7 @@ class SpidResourceIT {
     @Test
     @Transactional
     void getNonExistingSpid() throws Exception {
-        // Get the spid
+        // Get the idp
         restSpidMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isNotFound());
     }
 
@@ -291,58 +291,58 @@ class SpidResourceIT {
     @Transactional
     void putNewSpid() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
-        int databaseSizeBeforeUpdate = spidRepository.findAll().size();
+        int databaseSizeBeforeUpdate = idpRepository.findAll().size();
 
-        // Update the spid
-        Spid updatedSpid = spidRepository.findById(spid.getId()).get();
-        // Disconnect from session so that the updates on updatedSpid are not directly saved in db
-        em.detach(updatedSpid);
-        updatedSpid.config(UPDATED_CONFIG);
+        // Update the idp
+        Idp updatedIdp = idpRepository.findById(idp.getId()).get();
+        // Disconnect from session so that the updates on updatedIdp are not directly saved in db
+        em.detach(updatedIdp);
+        updatedIdp.config(UPDATED_CONFIG);
 
         restSpidMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedSpid.getId())
+                put(ENTITY_API_URL_ID, updatedIdp.getId())
                     .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedSpid))
+                    .content(TestUtil.convertObjectToJsonBytes(updatedIdp))
             )
             .andExpect(status().isOk());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeUpdate);
-        Spid testSpid = spidList.get(spidList.size() - 1);
-        assertThat(testSpid.getConfig()).isEqualTo(UPDATED_CONFIG);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeUpdate);
+        Idp testIdp = idpList.get(idpList.size() - 1);
+        assertThat(testIdp.getConfig()).isEqualTo(UPDATED_CONFIG);
     }
 
     @Test
     @Transactional
     void putNonExistingSpid() throws Exception {
-        int databaseSizeBeforeUpdate = spidRepository.findAll().size();
-        spid.setId(count.incrementAndGet());
+        int databaseSizeBeforeUpdate = idpRepository.findAll().size();
+        idp.setId(count.incrementAndGet());
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restSpidMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, spid.getId())
+                put(ENTITY_API_URL_ID, idp.getId())
                     .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(spid))
+                    .content(TestUtil.convertObjectToJsonBytes(idp))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeUpdate);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
     void putWithIdMismatchSpid() throws Exception {
-        int databaseSizeBeforeUpdate = spidRepository.findAll().size();
-        spid.setId(count.incrementAndGet());
+        int databaseSizeBeforeUpdate = idpRepository.findAll().size();
+        idp.setId(count.incrementAndGet());
 
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSpidMockMvc
@@ -350,119 +350,119 @@ class SpidResourceIT {
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(spid))
+                    .content(TestUtil.convertObjectToJsonBytes(idp))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeUpdate);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
     void putWithMissingIdPathParamSpid() throws Exception {
-        int databaseSizeBeforeUpdate = spidRepository.findAll().size();
-        spid.setId(count.incrementAndGet());
+        int databaseSizeBeforeUpdate = idpRepository.findAll().size();
+        idp.setId(count.incrementAndGet());
 
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSpidMockMvc
             .perform(
-                put(ENTITY_API_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(spid))
+                put(ENTITY_API_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(idp))
             )
             .andExpect(status().isMethodNotAllowed());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeUpdate);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
     void partialUpdateSpidWithPatch() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
-        int databaseSizeBeforeUpdate = spidRepository.findAll().size();
+        int databaseSizeBeforeUpdate = idpRepository.findAll().size();
 
-        // Update the spid using partial update
-        Spid partialUpdatedSpid = new Spid();
-        partialUpdatedSpid.setId(spid.getId());
+        // Update the idp using partial update
+        Idp partialUpdatedIdp = new Idp();
+        partialUpdatedIdp.setId(idp.getId());
 
-        partialUpdatedSpid.config(UPDATED_CONFIG);
+        partialUpdatedIdp.config(UPDATED_CONFIG);
 
         restSpidMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, partialUpdatedSpid.getId())
+                patch(ENTITY_API_URL_ID, partialUpdatedIdp.getId())
                     .with(csrf())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedSpid))
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedIdp))
             )
             .andExpect(status().isOk());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeUpdate);
-        Spid testSpid = spidList.get(spidList.size() - 1);
-        assertThat(testSpid.getConfig()).isEqualTo(UPDATED_CONFIG);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeUpdate);
+        Idp testIdp = idpList.get(idpList.size() - 1);
+        assertThat(testIdp.getConfig()).isEqualTo(UPDATED_CONFIG);
     }
 
     @Test
     @Transactional
     void fullUpdateSpidWithPatch() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
-        int databaseSizeBeforeUpdate = spidRepository.findAll().size();
+        int databaseSizeBeforeUpdate = idpRepository.findAll().size();
 
-        // Update the spid using partial update
-        Spid partialUpdatedSpid = new Spid();
-        partialUpdatedSpid.setId(spid.getId());
+        // Update the idp using partial update
+        Idp partialUpdatedIdp = new Idp();
+        partialUpdatedIdp.setId(idp.getId());
 
-        partialUpdatedSpid.config(UPDATED_CONFIG);
+        partialUpdatedIdp.config(UPDATED_CONFIG);
 
         restSpidMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, partialUpdatedSpid.getId())
+                patch(ENTITY_API_URL_ID, partialUpdatedIdp.getId())
                     .with(csrf())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedSpid))
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedIdp))
             )
             .andExpect(status().isOk());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeUpdate);
-        Spid testSpid = spidList.get(spidList.size() - 1);
-        assertThat(testSpid.getConfig()).isEqualTo(UPDATED_CONFIG);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeUpdate);
+        Idp testIdp = idpList.get(idpList.size() - 1);
+        assertThat(testIdp.getConfig()).isEqualTo(UPDATED_CONFIG);
     }
 
     @Test
     @Transactional
     void patchNonExistingSpid() throws Exception {
-        int databaseSizeBeforeUpdate = spidRepository.findAll().size();
-        spid.setId(count.incrementAndGet());
+        int databaseSizeBeforeUpdate = idpRepository.findAll().size();
+        idp.setId(count.incrementAndGet());
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restSpidMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, spid.getId())
+                patch(ENTITY_API_URL_ID, idp.getId())
                     .with(csrf())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(spid))
+                    .content(TestUtil.convertObjectToJsonBytes(idp))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeUpdate);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
     void patchWithIdMismatchSpid() throws Exception {
-        int databaseSizeBeforeUpdate = spidRepository.findAll().size();
-        spid.setId(count.incrementAndGet());
+        int databaseSizeBeforeUpdate = idpRepository.findAll().size();
+        idp.setId(count.incrementAndGet());
 
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSpidMockMvc
@@ -470,20 +470,20 @@ class SpidResourceIT {
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .with(csrf())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(spid))
+                    .content(TestUtil.convertObjectToJsonBytes(idp))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeUpdate);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
     void patchWithMissingIdPathParamSpid() throws Exception {
-        int databaseSizeBeforeUpdate = spidRepository.findAll().size();
-        spid.setId(count.incrementAndGet());
+        int databaseSizeBeforeUpdate = idpRepository.findAll().size();
+        idp.setId(count.incrementAndGet());
 
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSpidMockMvc
@@ -491,30 +491,30 @@ class SpidResourceIT {
                 patch(ENTITY_API_URL)
                     .with(csrf())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(spid))
+                    .content(TestUtil.convertObjectToJsonBytes(idp))
             )
             .andExpect(status().isMethodNotAllowed());
 
-        // Validate the Spid in the database
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeUpdate);
+        // Validate the Idp in the database
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
     void deleteSpid() throws Exception {
         // Initialize the database
-        spidRepository.saveAndFlush(spid);
+        idpRepository.saveAndFlush(idp);
 
-        int databaseSizeBeforeDelete = spidRepository.findAll().size();
+        int databaseSizeBeforeDelete = idpRepository.findAll().size();
 
-        // Delete the spid
+        // Delete the idp
         restSpidMockMvc
-            .perform(delete(ENTITY_API_URL_ID, spid.getId()).with(csrf()).accept(MediaType.APPLICATION_JSON))
+            .perform(delete(ENTITY_API_URL_ID, idp.getId()).with(csrf()).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
         // Validate the database contains one less item
-        List<Spid> spidList = spidRepository.findAll();
-        assertThat(spidList).hasSize(databaseSizeBeforeDelete - 1);
+        List<Idp> idpList = idpRepository.findAll();
+        assertThat(idpList).hasSize(databaseSizeBeforeDelete - 1);
     }
 }
