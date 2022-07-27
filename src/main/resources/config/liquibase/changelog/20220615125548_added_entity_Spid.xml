@@ -7,15 +7,18 @@
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <!--
-        Added the entity Spid.
+        Added the entity Idp.
     -->
     <changeSet id="20220615125548-1" author="jhipster">
-        <createTable tableName="spid">
+        <createTable tableName="idp">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="config" type="varchar(255)">
-                <constraints nullable="true" />
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="config" type="varchar(8192)">
+                <constraints nullable="false" />
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
@@ -33,11 +36,13 @@
     -->
     <changeSet id="20220615125548-1-data" author="jhipster" context="faker">
         <loadData
-                  file="config/liquibase/fake-data/spid.csv"
+                  file="config/liquibase/idp-data/idp.csv"
                   separator=";"
-                  tableName="spid"
+                  tableName="idp"
+                  quotchar="'"
                   usePreparedStatements="true">
             <column name="id" type="numeric"/>
+            <column name="name" type="string"/>
             <column name="config" type="string"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
         </loadData>

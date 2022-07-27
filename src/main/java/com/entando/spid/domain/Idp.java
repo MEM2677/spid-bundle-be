@@ -6,12 +6,12 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
- * A Spid.
+ * A Idp.
  */
 @Entity
-@Table(name = "spid")
+@Table(name = "idp")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Spid implements Serializable {
+public class Idp implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -21,7 +21,10 @@ public class Spid implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "config")
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "config", nullable = false)
     private String config;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -30,7 +33,7 @@ public class Spid implements Serializable {
         return this.id;
     }
 
-    public Spid id(Long id) {
+    public Idp id(Long id) {
         this.setId(id);
         return this;
     }
@@ -43,13 +46,21 @@ public class Spid implements Serializable {
         return this.config;
     }
 
-    public Spid config(String config) {
+    public Idp config(String config) {
         this.setConfig(config);
         return this;
     }
 
     public void setConfig(String config) {
         this.config = config;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
@@ -59,10 +70,10 @@ public class Spid implements Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Spid)) {
+        if (!(o instanceof Idp)) {
             return false;
         }
-        return id != null && id.equals(((Spid) o).id);
+        return id != null && id.equals(((Idp) o).id);
     }
 
     @Override
@@ -74,8 +85,9 @@ public class Spid implements Serializable {
     // prettier-ignore
     @Override
     public String toString() {
-        return "Spid{" +
+        return "Idp{" +
             "id=" + getId() +
+            ", name='" + getName() + "'" +
             ", config='" + getConfig() + "'" +
             "}";
     }

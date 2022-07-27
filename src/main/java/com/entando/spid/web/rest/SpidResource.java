@@ -1,9 +1,9 @@
 package com.entando.spid.web.rest;
 
-import com.entando.spid.domain.Spid;
-import com.entando.spid.repository.SpidRepository;
+import com.entando.spid.domain.Idp;
+import com.entando.spid.repository.IdpRepository;
 import com.entando.spid.service.SpidQueryService;
-import com.entando.spid.service.SpidService;
+import com.entando.spid.service.IdpService;
 import com.entando.spid.service.criteria.SpidCriteria;
 import com.entando.spid.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -26,7 +25,7 @@ import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 
 /**
- * REST controller for managing {@link com.entando.spid.domain.Spid}.
+ * REST controller for managing {@link Idp}.
  */
 @RestController
 @RequestMapping("/api")
@@ -39,32 +38,32 @@ public class SpidResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
-    private final SpidService spidService;
+    private final IdpService idpService;
 
-    private final SpidRepository spidRepository;
+    private final IdpRepository idpRepository;
 
     private final SpidQueryService spidQueryService;
 
-    public SpidResource(SpidService spidService, SpidRepository spidRepository, SpidQueryService spidQueryService) {
-        this.spidService = spidService;
-        this.spidRepository = spidRepository;
+    public SpidResource(IdpService idpService, IdpRepository idpRepository, SpidQueryService spidQueryService) {
+        this.idpService = idpService;
+        this.idpRepository = idpRepository;
         this.spidQueryService = spidQueryService;
     }
 
     /**
-     * {@code POST  /spids} : Create a new spid.
+     * {@code POST  /spids} : Create a new idp.
      *
-     * @param spid the spid to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new spid, or with status {@code 400 (Bad Request)} if the spid has already an ID.
+     * @param idp the idp to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new idp, or with status {@code 400 (Bad Request)} if the idp has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/spids")
-    public ResponseEntity<Spid> createSpid(@RequestBody Spid spid) throws URISyntaxException {
-        log.debug("REST request to save Spid : {}", spid);
-        if (spid.getId() != null) {
-            throw new BadRequestAlertException("A new spid cannot already have an ID", ENTITY_NAME, "idexists");
+    public ResponseEntity<Idp> createSpid(@RequestBody Idp idp) throws URISyntaxException {
+        log.debug("REST request to save Idp : {}", idp);
+        if (idp.getId() != null) {
+            throw new BadRequestAlertException("A new idp cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        Spid result = spidService.save(spid);
+        Idp result = idpService.save(idp);
         return ResponseEntity
             .created(new URI("/api/spids/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -72,68 +71,68 @@ public class SpidResource {
     }
 
     /**
-     * {@code PUT  /spids/:id} : Updates an existing spid.
+     * {@code PUT  /spids/:id} : Updates an existing idp.
      *
-     * @param id the id of the spid to save.
-     * @param spid the spid to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated spid,
-     * or with status {@code 400 (Bad Request)} if the spid is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the spid couldn't be updated.
+     * @param id the id of the idp to save.
+     * @param idp the idp to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated idp,
+     * or with status {@code 400 (Bad Request)} if the idp is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the idp couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/spids/{id}")
-    public ResponseEntity<Spid> updateSpid(@PathVariable(value = "id", required = false) final Long id, @RequestBody Spid spid)
-        throws URISyntaxException {
-        log.debug("REST request to update Spid : {}, {}", id, spid);
-        if (spid.getId() == null) {
+    public ResponseEntity<Idp> updateSpid(@PathVariable(value = "id", required = false) final Long id, @RequestBody Idp idp)
+        throws Throwable {
+        log.debug("REST request to update Idp : {}, {}", id, idp);
+        if (idp.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, spid.getId())) {
+        if (!Objects.equals(id, idp.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
-        if (!spidRepository.existsById(id)) {
+        if (!idpRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Spid result = spidService.save(spid);
+        Idp result = idpService.save(idp);
         return ResponseEntity
             .ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, spid.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, idp.getId().toString()))
             .body(result);
     }
 
     /**
-     * {@code PATCH  /spids/:id} : Partial updates given fields of an existing spid, field will ignore if it is null
+     * {@code PATCH  /spids/:id} : Partial updates given fields of an existing idp, field will ignore if it is null
      *
-     * @param id the id of the spid to save.
-     * @param spid the spid to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated spid,
-     * or with status {@code 400 (Bad Request)} if the spid is not valid,
-     * or with status {@code 404 (Not Found)} if the spid is not found,
-     * or with status {@code 500 (Internal Server Error)} if the spid couldn't be updated.
+     * @param id the id of the idp to save.
+     * @param idp the idp to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated idp,
+     * or with status {@code 400 (Bad Request)} if the idp is not valid,
+     * or with status {@code 404 (Not Found)} if the idp is not found,
+     * or with status {@code 500 (Internal Server Error)} if the idp couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/spids/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<Spid> partialUpdateSpid(@PathVariable(value = "id", required = false) final Long id, @RequestBody Spid spid)
+    public ResponseEntity<Idp> partialUpdateSpid(@PathVariable(value = "id", required = false) final Long id, @RequestBody Idp idp)
         throws URISyntaxException {
-        log.debug("REST request to partial update Spid partially : {}, {}", id, spid);
-        if (spid.getId() == null) {
+        log.debug("REST request to partial update Idp partially : {}, {}", id, idp);
+        if (idp.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, spid.getId())) {
+        if (!Objects.equals(id, idp.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
-        if (!spidRepository.existsById(id)) {
+        if (!idpRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<Spid> result = spidService.partialUpdate(spid);
+        Optional<Idp> result = idpService.partialUpdate(idp);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, spid.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, idp.getId().toString())
         );
     }
 
@@ -145,9 +144,10 @@ public class SpidResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of spids in body.
      */
     @GetMapping("/spids")
-    public ResponseEntity<List<Spid>> getAllSpids(SpidCriteria criteria, Pageable pageable) {
+    public ResponseEntity<List<Idp>> getAllSpids(SpidCriteria criteria, Pageable pageable) {
         log.debug("REST request to get Spids by criteria: {}", criteria);
-        Page<Spid> page = spidQueryService.findByCriteria(criteria, pageable);
+        Page<Idp> page = spidQueryService.findByCriteria(criteria, pageable);
+        page.getContent().stream().forEach(c -> System.out.println(c.getConfig()));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -171,9 +171,9 @@ public class SpidResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the spid, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/spids/{id}")
-    public ResponseEntity<Spid> getSpid(@PathVariable Long id) {
-        log.debug("REST request to get Spid : {}", id);
-        Optional<Spid> spid = spidService.findOne(id);
+    public ResponseEntity<Idp> getSpid(@PathVariable Long id) {
+        log.debug("REST request to get Idp : {}", id);
+        Optional<Idp> spid = idpService.findOne(id);
         return ResponseUtil.wrapOrNotFound(spid);
     }
 
@@ -185,8 +185,8 @@ public class SpidResource {
      */
     @DeleteMapping("/spids/{id}")
     public ResponseEntity<Void> deleteSpid(@PathVariable Long id) {
-        log.debug("REST request to delete Spid : {}", id);
-        spidService.delete(id);
+        log.debug("REST request to delete Idp : {}", id);
+        idpService.delete(id);
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))

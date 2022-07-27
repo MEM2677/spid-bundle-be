@@ -92,6 +92,8 @@ public class IdentityProviderConfig {
     private String addExtensionsElementWithKeyInfo;
     private String billingContactEmail;
     private String principalType;
+    private String otherContactFiscalCode;
+    private String encryptionPublicKey;
 
     public String getAuthnContextClassRefs() {
         return authnContextClassRefs;
@@ -475,5 +477,21 @@ public class IdentityProviderConfig {
 
     public void setBillingContactEmail(String billingContactEmail) {
         this.billingContactEmail = billingContactEmail;
+    }
+
+    public String getOtherContactFiscalCode() {
+        return otherContactFiscalCode;
+    }
+
+    public void setOtherContactFiscalCode(String otherContactFiscalCode) {
+        this.otherContactFiscalCode = otherContactFiscalCode;
+    }
+
+    public String getEncryptionPublicKey() {
+        return encryptionPublicKey;
+    }
+
+    public void setEncryptionPublicKey(String encryptionPublicKey) {
+        this.encryptionPublicKey = encryptionPublicKey;
     }
 }

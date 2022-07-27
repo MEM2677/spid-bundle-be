@@ -1,29 +1,31 @@
 package com.entando.spid.service;
 
-import com.entando.spid.domain.Spid;
+import com.entando.spid.domain.Idp;
+
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Service Interface for managing {@link Spid}.
+ * Service Interface for managing {@link Idp}.
  */
-public interface SpidService {
+public interface IdpService {
     /**
-     * Save a spid.
+     * Save a idp.
      *
-     * @param spid the entity to save.
+     * @param idp the entity to save.
      * @return the persisted entity.
      */
-    Spid save(Spid spid);
+    Idp save(Idp idp);
 
     /**
-     * Partially updates a spid.
+     * Partially updates a idp.
      *
-     * @param spid the entity to update partially.
+     * @param idp the entity to update partially.
      * @return the persisted entity.
      */
-    Optional<Spid> partialUpdate(Spid spid);
+    Optional<Idp> partialUpdate(Idp idp);
 
     /**
      * Get all the spids.
@@ -31,7 +33,9 @@ public interface SpidService {
      * @param pageable the pagination information.
      * @return the list of entities.
      */
-    Page<Spid> findAll(Pageable pageable);
+    Page<Idp> findAll(Pageable pageable);
+
+    List<Idp> findAll();
 
     /**
      * Get the "id" spid.
@@ -39,7 +43,7 @@ public interface SpidService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<Spid> findOne(Long id);
+    Optional<Idp> findOne(Long id);
 
     /**
      * Delete the "id" spid.
