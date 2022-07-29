@@ -14,11 +14,19 @@ public class ConnectionInfo {
         try {
 //      this.password = new String(Base64.getDecoder().decode(password));
 //      this.username = new String(Base64.getDecoder().decode(username));
-            this.password = new String(password);
-            this.username = new String(username);
+            this.password = password;
+            this.username = username;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getCLientId() {
+        return username;
+    }
+
+    public String getClientSecret() {
+        return password;
     }
 
     public String getUsername() {

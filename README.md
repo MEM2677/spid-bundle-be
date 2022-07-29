@@ -5,13 +5,31 @@ SPID (Sistema Pubblico di Identità Digitale) is a system used by Public Adminis
 to authenticate a given user.
 
 
-**NOTE:** in this first release we are targeting the public [SPID test server](https://demo.spid.gov.it/#/login), however you can easily change the configuration
-to add new desired providers.
+
 
 This PBC let **Entando 7** to be certified as SPID Service Provider
 
 **NOTE:** installing the PBC alone is not sufficient to start the accreditation process: be sure to read the [technical
-documentation](https://docs.italia.it/italia/spid/spid-regole-tecniche/it/stabile/index.html) first and then the whole [certification procedure](https://www.spid.gov.it/cos-e-spid/diventa-fornitore-di-servizi/).
+documentation](https://docs.italia.it/italia/idp/idp-regole-tecniche/it/stabile/index.html) first and then the whole [certification procedure](https://www.idp.gov.it/cos-e-idp/diventa-fornitore-di-servizi/).
+
+Below the list of the Identity providers currently supported
+
+| Name of the provider         |
+|------------------------------|
+| Aruba PEC S.p.A.             |
+| In.Te.S.A. S.p.A.            |
+| InfoCert S.p.A.              |
+| Lepida S.c.p.A.              |
+| Namirial S.p.A.              |
+| Poste Italiane S.p.A.        |
+| Register S.p.A.              |
+| Sielte S.p.A.                |
+| TeamSystem S.p.A.            |
+| TI Trust Technologies S.r.l. |
+
+**NOTE:** a test IdP will also be created to let the organization validate the general setup of the environment against the [test server](https://demo.spid.gov.it/#/login) 
+made available by the public administration.
+
 
 ## Prerequisites
 
@@ -19,8 +37,8 @@ Before installing the bundle in your Entando 7 installation, a few operations mu
 
 These operations include:
 - copy of the provider JAR into Keycloak pod
-- creation of the secrets
-- configure the bundle
+- creation of the secret
+- configure the bundle by specifying the organization data
 
 The first two steps must be performed by the sysOps or devOps, the last one can be done by a developer.
 
@@ -35,10 +53,10 @@ kubectl get po -n <NAMESPACE> | grep default-sso-in-namespace-deployment | head 
 ````
 where NAMESPACE is the namespace where Entando was installed to.
 
-Copy the spid-provider.jar into the Keycloak pod with the command
+Copy the idp-provider.jar into the Keycloak pod with the command
 
 ```shell
-kubectl spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/jboss/keycloak/standalone/deployments
+kubectl bundle/idp-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/jboss/keycloak/standalone/deployments
 ```
 
 where `default-sso-in-namespace-deployment-aaabbbccc-dddee` is the name of the Keycloak pod
@@ -48,12 +66,13 @@ The result of this operation is to add a new identity
 provider, **SPID**, to the list of those already available. This provider will be configured automatically when the bundle is installed.
 For this reason installing the bundle without these preliminary step will result in an error.
 
-### Prepare secrets
+### Prepare the client secret
 
 Secrets are a means of transport of sensible information to the bundle, so to let it perform various setup operations.
-This information is the username and password of a Keycloak user with the privilege to execute setup operations.
+The service connects to Keycloak using a SAT account, so the secret contains the secret of the Keycloak client used for connection
+(the client ID is obtained from the environment variables but that can be overridden).
 
-**NOTE:** the creation of the secrets must be done only once and repeated only when the Git repository of the bundle changes.
+**NOTE:** the creation of the secret must be done only once and repeated only when the Git repository of the bundle changes.
 
 As specified in the [documentation](https://developer.entando.com/next/tutorials/devops/plugin-environment-variables.html) the secrets bound to a bundle
 must have specific names starting with the bundle ID.  
@@ -67,27 +86,68 @@ where <MY_REPOSITORY> is the address of the Git repository containing the bundle
 Create the secret for username and password with the following commands
 
 ```shell
-kubectl create secret generic <BUNDLE_ID>-sso-admin-username --from-literal=username=<USERNAME> -n <NAMESPACE>
-
-kubectl create secret generic <BUNDLE_ID>-sso-admin-password --from-literal=password=<PASSWORD> -n <NAMESPACE>
+kubectl create secret generic <BUNDLE_ID>-client-secret --from-literal=password=<CLIENT_SECRET> -n <NAMESPACE>
 
 ```
 
-with NAMESPACE being the namespace where Entando is installed, USERNAME and PASSWORD the values of the Keycloak account and
+with NAMESPACE being the namespace where Entando is installed, CLIENT_SECRET the value of the Keycloak client-secret and
 BUNDLE_ID the bundle ID found in the previous step.
 
 ### Configure the bundle
 
-IN the last step the developer makes sure the plugin deployer file is well configured, typically making sure that the correct
-secrets are referenced.
+In the last step is necessary to specify the organization data: they are replicated for every identity provider known by the
+installer.
 
-This application was generated using JHipster 7.2.0, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v7.2.0](https://www.jhipster.tech/documentation-archive/v7.2.0).
+Below the list of the field shared between private organizations and public administrations:
 
-This is a "microservice" application intended to be part of a microservice architecture, please refer to the [Doing microservices with JHipster][] page of the documentation for more information.
-This application is configured for Service Discovery and Configuration with . On launch, it will refuse to start if it is not able to connect to .
+| Variable                   | Example                                  | Description                                                                                                                                                |
+|----------------------------|------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ORGANIZATION_NAMES         | en&#124;Entando, it&#124;Entando         | Localized name of the organization. <br>The pipe "&#124;" separates the language <br>code from the property, the comma<br/> separates different properties |
+| ORGANIZATION_DISPLAY_NAMES | en&#124;Entando, it&#124;Entando         | Localized name shown publicly                                                                                                                              |
+| ORGANIZATION_URLS          | en&#124;entando.com, it&#124;entando.com | The organization URL                                                                                                                                       |
+| OTHER_CONTACT_COMPANY      | Entando                                  | Contact company name                                                                                                                                       |
+| OTHER_CONTACT_PHONE        | +395556935632                            | Contact phone                                                                                                                                              |
+| OTHER_CONTACT_EMAIL        | anymail@company.com                      | Contact email                                                                                                                                              |
 
 
+The following fields determines whether the organization is private or public:
 
+| Variable                    | Example | Description                                          |
+|-----------------------------|---------|------------------------------------------------------|
+| OTHER_CONTACT_IS_SP_PRIVATE | true    | true if the organization is provate, false otherwise |
+
+
+The following field is for **Italian public administraion only**:
+
+| Variable               | Example | Description                 |
+|------------------------|---------|-----------------------------|
+| OTHER_CONTACT_IPA_CODE | PIA123  | IPA code assigned to the PA |
+
+
+The following fields are for **private organizations only**:
+
+| Variable                      | Example                           | Description                 |
+|-------------------------------|-----------------------------------|-----------------------------|
+| OTHER_CONTACT_VAT_NUMBER      | IT03264290929                     | The VAT of the organization |
+| BILLING_CONTACT_COMPANY       | Entando                           | The billing company name    |
+| BILLING_CONTACT_EMAIL         | billing@company.com               | The billing mail            |
+| BILLING_CONTACT_REGISTRY_NAME | Entando                           | The registry name           |
+| BILLING_CONTACT_SITE_ADDRESS  | Via&#124;P.zza&#124;V.le Sardegna | Address of the company      |
+| BILLING_CONTACT_SITE_NUMBER   | 9                                 | Address number              |
+| BILLING_CONTACT_SITE_CITY     | Cagliari                          | Company HQ City             |
+| BILLING_CONTACT_SITE_ZIP_CODE | 09127                             | Italian HQ ZIP code (CAP)   |
+| BILLING_CONTACT_SITE_PROVINCE | CA                                | Company HQ province (Prov)  |
+| BILLING_CONTACT_SITE_COUNTRY  | IT                                | Company HQ country          |
+
+### Other environment variables
+
+The following environment variable are also available:
+
+| Variable                | Example | Description                                                                                                               |
+|-------------------------|---------|---------------------------------------------------------------------------------------------------------------------------|
+| SPID_CONFIG_ACTIVE      | true    | Toggle the configuration setup: when false nothing is done                                                                |
+| KEYCLOAK_PROTO          | https   | Let developers override the protocol to connect to Keycloak with                                                          |
+| KEYCLOAK_SPID_CLIENT_ID |         | Secret to override the **client_id** to use for the connection to Keycloak; <br> update the **client_secret** accordingly |
 
 
 ## Development
@@ -244,7 +304,7 @@ jhipster:
 
 ### Packaging as jar
 
-To build the final jar and optimize the spid application for production, run:
+To build the final jar and optimize the idp application for production, run:
 
 ```
 ./mvnw -Pprod clean verify
