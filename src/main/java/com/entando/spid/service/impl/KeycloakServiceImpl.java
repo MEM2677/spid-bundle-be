@@ -213,7 +213,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                 }
             }
             if (configured == 0) {
-                logger.error("No provider configured successfully!");
+                logger.error("No provider configured!");
                 return false;
             }
             // * create JWT mappings
@@ -235,7 +235,7 @@ public class KeycloakServiceImpl implements KeycloakService {
             } else {
                 logger.info("Skipping JWT mapping as requested");
             }
-            logger.info("{} identity providers successfully configured", templates.size());
+            logger.info("{} identity providers successfully configured", configured);
         } catch (Throwable t) {
             logger.error("unexpected error in configureKeycloak", t);
         }

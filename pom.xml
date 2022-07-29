@@ -6,8 +6,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.entando.idp</groupId>
-    <artifactId>idp-bundle</artifactId>
-    <version>0.1.12</version>
+    <artifactId>spid-bundle</artifactId>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>Spid</name>
 

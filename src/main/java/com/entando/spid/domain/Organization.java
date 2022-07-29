@@ -1,6 +1,5 @@
 package com.entando.spid.domain;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
