@@ -82,28 +82,11 @@ public class KeycloakServiceImpl implements KeycloakService {
             connection.setLogin(clientName, password);
             Token token = getServiceAccountToken(connection);
 
-/*
-            Client[] clients = getClients(host, token, 0);
-            Client client = findClient(clients, "web_app");
-            if (client != null) {
-                String clientId = client.getId();
-
-                logger.debug("Creating JWT mappings for client {}", clientId);
-                for (MapperAttribute attr : KEYCLOAK_IDP_MAPPING) {
-                    if (!createJwtMaping(host, token, clientId, attr)) {
-                        logger.error("Could not create JWT mapping for attribute {}", attr.getAttributeName());
-//                        return false;
-                    }
-                }
-                logger.info("JWT mappings created");
-            }
-*/
             if (token != null && configureKeycloak(connection, token)) {
                 logger.info("Host [{}] configuration complete", host);
             } else {
                 logger.error("Host [{}] configuration failed", host);
             }
-
         } catch (Throwable t) {
             logger.error("Unexpected error", t);
         }
@@ -206,32 +189,33 @@ public class KeycloakServiceImpl implements KeycloakService {
                 logger.error("No Identity Provider templates found!");
                 return false;
             }
+            // 7 - create mapping for SPID profile
             int configured = 0;
             for (Idp template: templates) {
                 if (configureIdp(host, token, template, organization)) {
                     configured++;
-                }
+            }
             }
             if (configured == 0) {
                 logger.error("No provider configured!");
-                return false;
+                    return false;
             }
-            // * create JWT mappings
+            // 8 create JWT mappings
             if (mapJwt) {
-                Client[] clients = getClients(host, token, 0);
-                Client client = findClient(clients, ENTANDO_WEB_CLIENT_ID);
-                if (client != null) {
-                    String clientId = client.getId();
+            Client[] clients = getClients(host, token, 0);
+            Client client = findClient(clients, ENTANDO_WEB_CLIENT_ID);
+            if (client != null) {
+                String clientId = client.getId();
 
-                    logger.debug("Creating JWT mappings for client {}", clientId);
-                    for (MapperAttribute attr : KEYCLOAK_IDP_MAPPING) {
-                        if (!createJwtMaping(host, token, clientId, attr)) {
-                            logger.error("Could not create JWT mapping for attribute {}", attr.getAttributeName());
-                            return false;
-                        }
+                logger.debug("Creating JWT mappings for client {}", clientId);
+                for (MapperAttribute attr: KEYCLOAK_IDP_MAPPING) {
+                    if (!createJwtMaping(host, token, clientId, attr)) {
+                        logger.error("Could not create JWT mapping for attribute {}", attr.getAttributeName());
+                        return false;
                     }
-                    logger.info("JWT mappings created");
                 }
+                logger.info("JWT mappings created");
+            }
             } else {
                 logger.info("Skipping JWT mapping as requested");
             }
@@ -319,6 +303,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         }
         return token;
     }
+
 
     /**
      * Get the access token authenticating as privileged user
