@@ -2,7 +2,7 @@
 version: '3.8'
 services:
   keycloak:
-    image: 'entando/entando-keycloak:7.0.0'
+    image: 'germanogiudici/forum-pa-keycloak-theme:0.0.1'
     command: [
         '-b',
         '0.0.0.0',
@@ -13,7 +13,10 @@ services:
         '-Dkeycloak.migration.dir=/opt/jboss/keycloak/realm-config',
         '-Dkeycloak.migration.strategy=IGNORE_EXISTING', # use 'OVERWRITE_EXISTING' instead if you want to reset your current configuration
         '-Djboss.socket.binding.port-offset=1000',
-      ]
+#         Enable the next line to export the current realm-config
+#        '-Dkeycloak.migration.action=export'
+
+    ]
     volumes:
       - ./realm-config:/opt/jboss/keycloak/realm-config
       - ./keycloak-db:/opt/jboss/keycloak/standalone/data
