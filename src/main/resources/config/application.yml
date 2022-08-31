@@ -206,4 +206,32 @@ swagger-ui:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+application:
+  spidConfigActive: ${SPID_CONFIG_ACTIVE}
+  otherContactIsSpPrivate: ${OTHER_CONTACT_IS_SP_PRIVATE}
+
+  billingContactCompany: ${BILLING_CONTACT_COMPANY}
+  billingContactEmail: ${BILLING_CONTACT_EMAIL}
+  billingContactPhone: ${BILLING_CONTACT_PHONE}
+  billingContactRegistryName: ${BILLING_CONTACT_REGISTRY_NAME}
+  billingContactSiteAddress: ${BILLING_CONTACT_SITE_ADDRESS}
+  billingContactSiteCity: ${BILLING_CONTACT_SITE_CITY}
+  billingContactSiteCountry: ${BILLING_CONTACT_SITE_COUNTRY}
+  billingContactSiteNumber: ${BILLING_CONTACT_SITE_NUMBER}
+  billingContactSiteProvince: ${BILLING_CONTACT_SITE_PROVINCE}
+  billingContactSiteZipCode: ${BILLING_CONTACT_SITE_ZIP_CODE}
+  organizationDisplayNames: ${ORGANIZATION_DISPLAY_NAMES}
+  organizationNames: ${ORGANIZATION_NAMES}
+  organizationUrls: ${ORGANIZATION_URLS}
+  otherContactCompany: ${OTHER_CONTACT_COMPANY}
+  otherContactEmail: ${OTHER_CONTACT_EMAIL}
+  otherContactFiscalCode: ${OTHER_CONTACT_FISCAL_CODE}
+  otherContactPhone: ${OTHER_CONTACT_PHONE}
+  otherContactVatNumber: ${OTHER_CONTACT_VAT_NUMBER}
+
+
+# Taken from container
+  keycloakRealm: ${KEYCLOAK_REALM}
+  keycloakClientId: ${KEYCLOAK_CLIENT_ID}
+  keycloakClientSecret: ${KEYCLOAK_CLIENT_SECRET}
+  keycloakAuthUrl: ${KEYCLOAK_AUTH_URL}

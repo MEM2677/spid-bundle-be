@@ -103,4 +103,33 @@ springfox:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+application:
+  spidConfigActive: true
+  otherContactIsSpPrivate: true
+
+  billingContactCompany: Entando
+  billingContactEmail: bastachesia@gmail.com
+  billingContactPhone: +395556935632
+  billingContactRegistryName: Entando
+  billingContactSiteAddress: Piazza Salento
+  billingContactSiteCity: Cagliari
+  billingContactSiteCountry: IT
+  billingContactSiteNumber: 9
+  billingContactSiteProvince: CA
+  billingContactSiteZipCode: 09127
+  organizationDisplayNames: en|Entando, it|Entando
+  organizationNames: en|Entando, it|Entando
+  organizationUrls: it|https://forumpa.apps.psdemo.eng-entando.com/entando-de-app/, en|https://forumpa.apps.psdemo.eng-entando.com/entando-de-app/
+  otherContactCompany: Entando
+  otherContactEmail: bastachesia@gmail.com
+  otherContactFiscalCode:
+  otherContactPhone: +395556935632
+  otherContactVatNumber: IT03264290929
+
+#
+# For local development ONLY
+#
+  keycloakRealm: jhipster
+  keycloakClientId: internal
+  keycloakClientSecret: internal
+  keycloakAuthUrl: http://localhost:9080/auth/

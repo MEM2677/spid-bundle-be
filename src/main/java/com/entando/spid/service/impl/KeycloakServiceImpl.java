@@ -1,6 +1,7 @@
 package com.entando.spid.service.impl;
 
 import com.entando.spid.ConfigUtils;
+import com.entando.spid.config.ApplicationProperties;
 import com.entando.spid.domain.Idp;
 import com.entando.spid.domain.Organization;
 import com.entando.spid.domain.keycloak.AuthenticationFlow;
@@ -43,50 +44,40 @@ public class KeycloakServiceImpl implements KeycloakService {
 
     private final IdpService idpService;
 
-    public KeycloakServiceImpl(IdpService idpService) {
+    public KeycloakServiceImpl(IdpService idpService, ApplicationProperties config) {
         this.idpService = idpService;
+        this.config = config;
     }
+
+    private final ApplicationProperties config;
 
     @Scheduled(fixedRate = Long.MAX_VALUE, initialDelay = 2000)
     @Override
     public void configure() {
         Map<String, String> envVars = System.getenv();
 
-        boolean enabled = Boolean.parseBoolean(envVars.get("SPID_CONFIG_ACTIVE"));
-        String host = envVars.get("DEFAULT_SSO_IN_NAMESPACE_SERVICE_PORT_8080_TCP_ADDR");
-        String port = envVars.get("DEFAULT_SSO_IN_NAMESPACE_SERVICE_SERVICE_PORT");
-        String proto = envVars.get("KEYCLOAK_PROTO");
-        String password = envVars.get("KEYCLOAK_CLIENT_SECRET");
-        String clientName = envVars.get("ENTANDO_APP_NAME");
+        String authUrl = config.getKeycloakAuthUrl();
 
-        if (StringUtils.isBlank(clientName)) {
-            clientName = envVars.get("KEYCLOAK_SPID_CLIENT_ID");
-            if (StringUtils.isBlank(clientName)) {
-                clientName = guessAppName(envVars);
-            }
+        // get rid of trailing slashes from URL
+        if (authUrl.endsWith("/")) {
+            config.setKeycloakAuthUrl(authUrl.substring(0, authUrl.length()- 1));
         }
 
-        if (!enabled) {
+        if (!config.getSpidConfigActive()) {
             logger.warn("Aborting Keycloak configuration as requested");
             return;
         }
         try {
-            if (StringUtils.isBlank(proto)) {
-                proto = DEFAULT_PROTO;
-            }
-            host = proto + "://" + host;
-            if (StringUtils.isNotBlank(port) && !port.equals("80")) {
-                host = host + ":" + port;
-            }
-            ConnectionInfo connection = new ConnectionInfo(host);
-            connection.setLogin(clientName, password);
+            ConnectionInfo connection = new ConnectionInfo(config.getKeycloakAuthUrl());
+            connection.setLogin(config.getKeycloakClientId(), config.getKeycloakClientSecret());
             Token token = getServiceAccountToken(connection);
 
             if (token != null && configureKeycloak(connection, token)) {
-                logger.info("Host [{}] configuration complete", host);
+                logger.info("Host [{}] configuration complete", config.getKeycloakAuthUrl());
             } else {
-                logger.error("Host [{}] configuration failed", host);
+                logger.error("Host [{}] configuration failed", config.getKeycloakAuthUrl());
             }
+
         } catch (Throwable t) {
             logger.error("Unexpected error", t);
         }
@@ -105,21 +96,6 @@ public class KeycloakServiceImpl implements KeycloakService {
         return null;
     }
 
-    /**
-     * Try to guess the app name == client name on Keycloak
-     * @param env environment variables
-     * @return the guessed name of the application
-     */
-    protected String guessAppName(Map<String, String> env) {
-        Optional<String> name = env
-            .keySet()
-            .stream()
-            .filter(k -> k.endsWith("_CM_SERVICE_PORT_8083_TCP_ADDR"))
-            .findFirst()
-            .map(k -> k.replaceFirst("_CM_SERVICE_PORT_8083_TCP_ADDR", "").toLowerCase());
-        // retain Java 8 compilation level
-        return name.orElse(null);
-    }
 
     /**
      * Configure a single Keycloak instance
@@ -183,7 +159,6 @@ public class KeycloakServiceImpl implements KeycloakService {
             logger.info("authentication flow successfully configured");
 
             // 6 - configure identity provider
-            ObjectMapper objectMapper = new ObjectMapper();
             List<Idp> templates = idpService.findAll();
             if (templates == null || templates.isEmpty()) {
                 logger.error("No Identity Provider templates found!");
@@ -275,7 +250,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         Token token = null;
         WebClient client = WebClient.create();
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        final String REST_URI = connection.getHost() + "/auth/realms/" + KEYCLOAK_DEFAULT_REALM + "/protocol/openid-connect/token";
+        final String REST_URI = connection.getHost() + "/realms/" + config.getKeycloakRealm() + "/protocol/openid-connect/token";
 
         body.add("client_id", connection.getCLientId());
         body.add("client_secret", connection.getClientSecret());
@@ -314,7 +289,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         Token token = null;
         WebClient client = WebClient.create();
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        final String REST_URI = connection.getHost() + "/auth/realms/master/protocol/openid-connect/token";
+        final String REST_URI = connection.getHost() + "/realms/master/protocol/openid-connect/token";
 
         body.add("username", connection.getUsername());
         body.add("password", connection.getPassword());
@@ -357,7 +332,7 @@ public class KeycloakServiceImpl implements KeycloakService {
      * @return true if the flow was duplicated
      */
     protected boolean duplicateAuthFlow(String host, Token token) {
-        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_DEFAULT_AUTH_FLOW + "/copy");
+        final String REST_URI = encodePath(host + "/admin/realms/" + config.getKeycloakRealm() + "/authentication/flows/" + KEYCLOAK_DEFAULT_AUTH_FLOW + "/copy");
         // for a simple payload there's no need to disturb Jackson
         String payload = "{\"newName\":\"" + KEYCLOAK_NEW_AUTH_FLOW_NAME + "\"}";
         Boolean created = false;
@@ -393,7 +368,7 @@ public class KeycloakServiceImpl implements KeycloakService {
      * @return true if the execution was successfully added
      */
     protected boolean addExecutable(String host, Token token) {
-        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_EXECUTION_HANDLE_EXISTING_ACCOUNT_NAME + "/executions/execution");
+        final String REST_URI = encodePath(host + "/admin/realms/" + config.getKeycloakRealm() + "/authentication/flows/" + KEYCLOAK_EXECUTION_HANDLE_EXISTING_ACCOUNT_NAME + "/executions/execution");
         WebClient client = WebClient.create();
         // for a simple payload there's no need to disturb Jackson
         String payload = "{\"provider\":\"idp-auto-link\"}";
@@ -430,7 +405,7 @@ public class KeycloakServiceImpl implements KeycloakService {
      */
     protected Execution[] getExecutions(String host, Token token) {
         Execution[] executions = null;
-        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_NEW_AUTH_FLOW_NAME + "/executions");
+        final String REST_URI = encodePath(host + "/admin/realms/" + config.getKeycloakRealm() + "/authentication/flows/" + KEYCLOAK_NEW_AUTH_FLOW_NAME + "/executions");
         WebClient client = WebClient.create();
 
         try {
@@ -463,7 +438,7 @@ public class KeycloakServiceImpl implements KeycloakService {
      * @return true if the priority was changed
      */
     protected boolean raiseExecutionPriority(String host, Token token, String id) {
-        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/executions/" + id + "/raise-priority");
+        final String REST_URI = encodePath(host + "/admin/realms/" + config.getKeycloakRealm() + "/authentication/executions/" + id + "/raise-priority");
         WebClient client = WebClient.create();
         Boolean success = true;
 
@@ -520,7 +495,7 @@ public class KeycloakServiceImpl implements KeycloakService {
      * @return true if the execution was updated
      */
     protected AuthenticationFlow updateExecution(String host, Token token, Execution execution) {
-        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/authentication/flows/" + KEYCLOAK_NEW_AUTH_FLOW_NAME + "/executions");
+        final String REST_URI = encodePath(host + "/admin/realms/" + config.getKeycloakRealm() + "/authentication/flows/" + KEYCLOAK_NEW_AUTH_FLOW_NAME + "/executions");
         AuthenticationFlow flow = null;
         WebClient client = WebClient.create();
 
@@ -557,7 +532,7 @@ public class KeycloakServiceImpl implements KeycloakService {
      * @return true if the new IdP was created
      */
     protected boolean createIdentityProvider(String host, Token token, IdentityProvider idp) {
-        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/identity-provider/instances");
+        final String REST_URI = encodePath(host + "/admin/realms/" + config.getKeycloakRealm() + "/identity-provider/instances");
         WebClient client = WebClient.create();
         Boolean created = false;
         try {
@@ -614,7 +589,7 @@ public class KeycloakServiceImpl implements KeycloakService {
      * @return true if the mapper was created
      */
     private boolean addMapperElement(String host, Token token, String idpAlias, String payload) {
-        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/identity-provider/instances/" + idpAlias + "/mappers");
+        final String REST_URI = encodePath(host + "/admin/realms/" + config.getKeycloakRealm() + "/identity-provider/instances/" + idpAlias + "/mappers");
         Boolean created = false;
         WebClient client = WebClient.create();
 
@@ -652,7 +627,7 @@ public class KeycloakServiceImpl implements KeycloakService {
      */
     protected Client[] getClients(String host, Token token, int start) {
         Client[] clients = null;
-        final String REST_URI = host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/clients?first=" + start + "&max=20";
+        final String REST_URI = host + "/admin/realms/" + config.getKeycloakRealm() + "/clients?first=" + start + "&max=20";
         WebClient client = WebClient.create();
 
         try {
@@ -686,7 +661,7 @@ public class KeycloakServiceImpl implements KeycloakService {
      * @return true if the JWT body was modified, false otherwise
      */
     protected boolean createJwtMaping(String host, Token token, String clientId, String payload) {
-        final String REST_URI = encodePath(host + "/auth/admin/realms/" + KEYCLOAK_DEFAULT_REALM + "/clients/" + clientId + "/protocol-mappers/models");
+        final String REST_URI = encodePath(host + "/admin/realms/" + config.getKeycloakRealm() + "/clients/" + clientId + "/protocol-mappers/models");
         WebClient client = WebClient.create();
         Boolean created = false;
 

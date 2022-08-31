@@ -2,7 +2,7 @@
 version: '3.8'
 services:
   keycloak:
-    image: 'germanogiudici/forum-pa-keycloak-theme:0.0.1'
+    image: 'entandopsdh/spid-keycloak-theme:0.0.1'
     command: [
         '-b',
         '0.0.0.0',
