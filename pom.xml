@@ -7,7 +7,7 @@
 
     <groupId>com.entando.idp</groupId>
     <artifactId>spid-bundle</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>Spid</name>
 
@@ -233,11 +233,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-loader-tools</artifactId>
         </dependency>
         <dependency>
@@ -292,9 +287,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20220320</version>
         </dependency>
         <!-- Adding the engine dependency to the surefire-plugin unfortunately does not work in the current version. -->
         <!-- https://www.archunit.org/userguide/html/000_Index.html#_junit_5 -->
@@ -616,7 +611,7 @@
                             <image>eclipse-temurin:11-jre-focal</image>
                         </from>
                         <to>
-                            <image>jangalian/${project.artifactId}:${project.version}</image>
+                            <image>entandopsdh/${project.artifactId}:${project.version}</image>
                             <tags>
                                 <tag>latest</tag>
                             </tags>

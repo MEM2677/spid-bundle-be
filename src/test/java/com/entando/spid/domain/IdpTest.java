@@ -1,30 +1,25 @@
 package com.entando.spid.domain;
 
-import static com.entando.spid.Constants.KEYCLOAK_NEW_AUTH_FLOW_NAME;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.entando.spid.ConfigUtils;
 import com.entando.spid.SpidApp;
 import com.entando.spid.domain.keycloak.Client;
 import com.entando.spid.web.rest.TestUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @ContextConfiguration(classes = SpidApp.class, loader = AnnotationConfigContextLoader.class)
