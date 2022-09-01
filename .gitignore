@@ -177,3 +177,4 @@ bundle/
 ####
 /bundle/resources/
 .idea/
+.ent/
