@@ -77,7 +77,7 @@ When developing locally reverting the configuration is immediate:
 First we stop the Keycloak instance:
 
 ```shell
-ent prok xk stop
+ent prj xk stop
 ```
 
 In the project root of this bundle locate the folder `./src/main/docker/keycloak-db` end delete all the files inside then restart the Keycloak container
