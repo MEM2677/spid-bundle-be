@@ -96,11 +96,21 @@ The procedure is as follows:
  
 When installing in production (or staging) we have two options:
 
- - replace the entire Keycloak image
- - modify the existing Keycloak installation
+The first step is to prepare Keycloak for the bundle execution; we have two options:  
+
+ - [replace the entire Keycloak image](#replace-keycloak-image)
+ - [modify the existing Keycloak installation](#modify-existing-keycloak)
 
 **IMPORTANT!** Please be aware that in the latter case the Keycloak theme is not updated so the dynamic list of providers won't be available.  
 The default behaviour of Keycloak in this case is to show a separate button for each SPID identity provider.
+
+
+The next steps are:
+
+ - [create the secret containing the configuration of the organization](#create-the-secret-with-organization-data)
+ - [create the bundle directory](#create-the-bundle-directory)
+ - [install the bundle through the CLI](#installation)
+
 
 ### Replace Keycloak image
 
@@ -164,7 +174,75 @@ The result of this operation is to add a new identity
 provider, **SPID**, to the list of those already available. This provider will be configured automatically when the bundle is installed.
 For this reason installing the bundle without these preliminary step will result in an error.
 
-### Organization properties
+### Create the secret with organization data
+
+To make the process of the creation of the secret easier developers can change the properties inside the script `configure.sh` then execute it with the command
+
+```shell
+sh ./bundle_src/configure.sh <NAMESPACE>
+```
+
+where NAMESPACE is the namespace of the Entando installation of interest.
+
+**NOTE:** this step must be executed at least once, otherwise the bundle installation will fail. 
+
+
+### Create the bundle directory
+
+From the root of the project run the command:
+
+```shell
+mkdir bundle && cp -R bundle_src/* bundle
+```
+
+This creates the output directory where the bundle will be placed
+
+### Installation
+
+As expected we use the CLI to install in a cluster. The procedure is the same presented [in the official documentation](https://developer.entando.com/next/tutorials/create/pb/publish-project-bundle.html#cli-steps) so:
+
+```shell
+ent prj build
+```
+
+To build the project
+
+```shell
+ent prj pbs-init
+```
+
+To declare the Git repository where the developers want the bundle to be stored
+
+```shell
+ent prj pbs-publish
+```
+
+To push the bundle in the repository
+
+```shell
+ent prj deploy
+```
+
+To finally deploy the bundle in Entando.
+
+At this point it is possible to access the `App Builder` to install the bundle.
+
+Alternatively, using the CLI, execute the command:
+
+```shell
+ent prj install
+```
+
+or
+
+```shell
+ent prj install --conflict-strategy=OVERRIDE
+```
+
+The latter is used when the bundle is already installed.
+
+
+## Organization properties
 
 These properties are replicated for every identity provider known by the installer.
 
