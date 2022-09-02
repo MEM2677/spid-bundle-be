@@ -66,8 +66,7 @@ The default Spring configuration should be ok for the most cases!
 However, the configuration file `src/main/resources/config/application-dev.yml` contains both the parameters of the organization, which are not relevant for local execution, and a little group
 of properties that might be of interest for the developer (eg. default realm, keycloak client id and password etc.).
 
-The configuration of the organization parameters is discussed [here](#configure-the-bundle). Should you change the organization parameters
-for the local execution is easy to correlate e.g. the variable in the YML file `organizationNames` with the environment variable `ORGANIZATION_NAMES` of the plugin descriptor.  
+The organization parameters are discussed [here](#organization-properties). 
 
 
 ## Reverting the configuration
@@ -165,9 +164,9 @@ The result of this operation is to add a new identity
 provider, **SPID**, to the list of those already available. This provider will be configured automatically when the bundle is installed.
 For this reason installing the bundle without these preliminary step will result in an error.
 
-### Configure the bundle
+### Organization properties
 
-This step is necessary to customize the organization data; these properties are replicated for every identity provider known by the installer.
+These properties are replicated for every identity provider known by the installer.
 
 Below the list of the fields shared between private organizations and public administrations:
 
