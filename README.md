@@ -80,7 +80,7 @@ First we stop the Keycloak instance:
 ent prj xk stop
 ```
 
-In the project root of this bundle locate the folder `./src/main/docker/keycloak-db` end delete all the files inside then restart the Keycloak container
+In the project root of this bundle locate the folder `./src/main/docker/keycloak-db` and delete all the files inside; then restart the Keycloak container
 as shown in the previous step.
 
 In a clustered installation the revert of the configuration must be done manually from the Keycloak admin interface. Obviously this
