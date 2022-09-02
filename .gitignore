@@ -179,3 +179,4 @@ bundle/
 .idea/
 .ent/
 !bundle_src/spid-provider.jar 
+

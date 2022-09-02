@@ -159,7 +159,7 @@ ent k cp bundle/idp-provider.jar default-sso-in-namespace-deployment-aaabbbccc-d
 
 where `default-sso-in-namespace-deployment-aaabbbccc-dddee` is the name of the Keycloak pod.
 
-You have to wait a few instants to let Keycloak sense the new provider and install it.  
+You have to wait a few instants to let Keycloak detect the new provider and install it.  
 
 The result of this operation is to add a new identity
 provider, **SPID**, to the list of those already available. This provider will be configured automatically when the bundle is installed.
@@ -167,8 +167,7 @@ For this reason installing the bundle without these preliminary step will result
 
 ### Configure the bundle
 
-In the last step is necessary to specify the organization data: they are replicated for every identity provider known by the
-installer.
+This step is necessary to customize the organization data; these properties are replicated for every identity provider known by the installer.
 
 Below the list of the fields shared between private organizations and public administrations:
 
