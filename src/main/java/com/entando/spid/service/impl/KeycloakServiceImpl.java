@@ -14,12 +14,12 @@ import com.entando.spid.service.KeycloakService;
 import com.entando.spid.service.dto.ConnectionInfo;
 import com.entando.spid.service.dto.MapperAttribute;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,7 +32,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -68,8 +73,6 @@ public class KeycloakServiceImpl implements KeycloakService {
     @Scheduled(fixedRate = Long.MAX_VALUE, initialDelay = 2000)
     @Override
     public void configure() {
-        Map<String, String> envVars = System.getenv();
-
         String authUrl = config.getKeycloakAuthUrl();
 
         // get rid of trailing slashes from URL
@@ -175,7 +178,7 @@ public class KeycloakServiceImpl implements KeycloakService {
             logger.info("authentication flow successfully configured");
 
             // 6 - configure identity provider
-            List<Idp> templates = idpService.findAll();
+            List<Idp> templates = idpService.getTemplates();
             if (templates == null || templates.isEmpty()) {
                 logger.error("No Identity Provider templates found!");
                 return false;
@@ -185,7 +188,7 @@ public class KeycloakServiceImpl implements KeycloakService {
             for (Idp template: templates) {
                 if (configureIdp(host, token, template, organization)) {
                     configured++;
-            }
+                }
             }
             if (configured == 0) {
                 logger.error("No provider configured!");
@@ -213,12 +216,13 @@ public class KeycloakServiceImpl implements KeycloakService {
             logger.info("{} identity providers successfully configured", configured);
         } catch (Throwable t) {
             logger.error("unexpected error in configureKeycloak", t);
+            return false;
         }
         return true;
     }
 
     /**
-     * Condfigure single identity provider
+     * Configure single identity provider
      * @param host the keycloak address
      * @param token the SAT
      * @param template configuration template
