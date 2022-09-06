@@ -18,6 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -44,12 +47,23 @@ public class KeycloakServiceImpl implements KeycloakService {
 
     private final IdpService idpService;
 
-    public KeycloakServiceImpl(IdpService idpService, ApplicationProperties config) {
+    private final ApplicationContext appContext;
+
+    private final ApplicationProperties config;
+
+    public KeycloakServiceImpl(IdpService idpService, ApplicationContext appContext, ApplicationProperties config) {
         this.idpService = idpService;
+        this.appContext = appContext;
         this.config = config;
     }
 
-    private final ApplicationProperties config;
+    protected void shutdown(int exitCode) {
+        logger.info("Shutting down service for unexpected errors");
+        logger.warn("exit code: {}", exitCode);
+        SpringApplication.exit(appContext, () -> exitCode);
+        System.exit(exitCode);
+    }
+
 
     @Scheduled(fixedRate = Long.MAX_VALUE, initialDelay = 2000)
     @Override
@@ -76,6 +90,8 @@ public class KeycloakServiceImpl implements KeycloakService {
                 logger.info("Host [{}] configuration complete", config.getKeycloakAuthUrl());
             } else {
                 logger.error("Host [{}] configuration failed", config.getKeycloakAuthUrl());
+                // exit the service
+                shutdown(0);
             }
 
         } catch (Throwable t) {

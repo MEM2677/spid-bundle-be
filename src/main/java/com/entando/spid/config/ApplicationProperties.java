@@ -31,6 +31,7 @@ public class ApplicationProperties {
     private Boolean otherContactIsSpPrivate;
     private String otherContactPhone;
     private String otherContactVatNumber;
+
     private Boolean spidConfigActive;
 
     private String keycloakRealm;
@@ -230,4 +231,5 @@ public class ApplicationProperties {
     public void setKeycloakAuthUrl(String keycloakAuthUrl) {
         this.keycloakAuthUrl = keycloakAuthUrl;
     }
+
 }
