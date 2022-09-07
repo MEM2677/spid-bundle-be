@@ -1,16 +1,9 @@
 package com.entando.spid.web.rest;
 
 import com.entando.spid.domain.Idp;
-import com.entando.spid.repository.IdpRepository;
-import com.entando.spid.service.SpidQueryService;
 import com.entando.spid.service.IdpService;
 import com.entando.spid.service.criteria.SpidCriteria;
 import com.entando.spid.web.rest.errors.BadRequestAlertException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,11 +11,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * REST controller for managing {@link Idp}.
@@ -40,14 +47,9 @@ public class SpidResource {
 
     private final IdpService idpService;
 
-    private final IdpRepository idpRepository;
 
-    private final SpidQueryService spidQueryService;
-
-    public SpidResource(IdpService idpService, IdpRepository idpRepository, SpidQueryService spidQueryService) {
+    public SpidResource(IdpService idpService) {
         this.idpService = idpService;
-        this.idpRepository = idpRepository;
-        this.spidQueryService = spidQueryService;
     }
 
     /**
@@ -63,7 +65,7 @@ public class SpidResource {
         if (idp.getId() != null) {
             throw new BadRequestAlertException("A new idp cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        Idp result = idpService.save(idp);
+        Idp result = null;
         return ResponseEntity
             .created(new URI("/api/spids/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -91,11 +93,8 @@ public class SpidResource {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
-        if (!idpRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
 
-        Idp result = idpService.save(idp);
+        Idp result = null;
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, idp.getId().toString()))
@@ -124,11 +123,8 @@ public class SpidResource {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
-        if (!idpRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
 
-        Optional<Idp> result = idpService.partialUpdate(idp);
+        Optional<Idp> result = null;
 
         return ResponseUtil.wrapOrNotFound(
             result,
@@ -146,7 +142,7 @@ public class SpidResource {
     @GetMapping("/spids")
     public ResponseEntity<List<Idp>> getAllSpids(SpidCriteria criteria, Pageable pageable) {
         log.debug("REST request to get Spids by criteria: {}", criteria);
-        Page<Idp> page = spidQueryService.findByCriteria(criteria, pageable);
+        Page<Idp> page = null;
         page.getContent().stream().forEach(c -> System.out.println(c.getConfig()));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
@@ -161,7 +157,7 @@ public class SpidResource {
     @GetMapping("/spids/count")
     public ResponseEntity<Long> countSpids(SpidCriteria criteria) {
         log.debug("REST request to count Spids by criteria: {}", criteria);
-        return ResponseEntity.ok().body(spidQueryService.countByCriteria(criteria));
+        return ResponseEntity.ok().body(2677L);
     }
 
     /**
@@ -173,7 +169,7 @@ public class SpidResource {
     @GetMapping("/spids/{id}")
     public ResponseEntity<Idp> getSpid(@PathVariable Long id) {
         log.debug("REST request to get Idp : {}", id);
-        Optional<Idp> spid = idpService.findOne(id);
+        Optional<Idp> spid = null;
         return ResponseUtil.wrapOrNotFound(spid);
     }
 
@@ -186,7 +182,7 @@ public class SpidResource {
     @DeleteMapping("/spids/{id}")
     public ResponseEntity<Void> deleteSpid(@PathVariable Long id) {
         log.debug("REST request to delete Idp : {}", id);
-        idpService.delete(id);
+
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))

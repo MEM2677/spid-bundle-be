@@ -1,8 +1,12 @@
 package com.entando.spid.service.impl;
 
 import com.entando.spid.domain.Idp;
-import com.entando.spid.repository.IdpRepository;
 import com.entando.spid.service.IdpService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,17 +15,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service Implementation for managing {@link Idp}.
@@ -34,12 +29,8 @@ public class IdpServiceImpl implements IdpService {
 
     private final Map<Long, Idp> templates = new ConcurrentHashMap<>();
 
-    @Deprecated
-    private final IdpRepository idpRepository;
+    public IdpServiceImpl() {
 
-    public IdpServiceImpl(IdpRepository idpRepository) {
-
-        this.idpRepository = idpRepository;
         try {
             prepareConfigurationMap("config/template/idpTemplates.csv");
         } catch (Throwable t) {
@@ -104,51 +95,4 @@ public class IdpServiceImpl implements IdpService {
         }
     }
 
-
-    @Override
-    public Idp save(Idp idp) {
-        log.debug("Request to save Idp : {}", idp);
-        return idpRepository.save(idp);
-    }
-
-    @Override
-    public Optional<Idp> partialUpdate(Idp idp) {
-        log.debug("Request to partially update Idp : {}", idp);
-
-        return idpRepository
-            .findById(idp.getId())
-            .map(existingSpid -> {
-                if (idp.getConfig() != null) {
-                    existingSpid.setConfig(idp.getConfig());
-                }
-
-                return existingSpid;
-            })
-            .map(idpRepository::save);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<Idp> findAll(Pageable pageable) {
-        log.debug("Request to get all IdP");
-        return idpRepository.findAll(pageable);
-    }
-
-    @Override
-    public List<Idp> findAll() {
-        return idpRepository.findAll();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<Idp> findOne(Long id) {
-        log.debug("Request to get Idp : {}", id);
-        return idpRepository.findById(id);
-    }
-
-    @Override
-    public void delete(Long id) {
-        log.debug("Request to delete Idp : {}", id);
-        idpRepository.deleteById(id);
-    }
 }

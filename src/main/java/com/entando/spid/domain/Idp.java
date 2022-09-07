@@ -8,23 +8,13 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
  * A Idp.
  */
-@Entity
-@Table(name = "idp")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+
 public class Idp implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
-    @Column(name = "id")
     private Long id;
-
-    @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "config", nullable = false)
     private String config;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
