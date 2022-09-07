@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
  * Service Implementation for managing {@link Idp}.
  */
 @Service
-@Transactional
 public class IdpServiceImpl implements IdpService {
 
     private final Logger log = LoggerFactory.getLogger(IdpServiceImpl.class);

@@ -9,14 +9,14 @@
 # ===================================================================
 
 spring:
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    url: jdbc:tc:postgresql:13.4:///spid?TC_TMPFS=/testtmpfs:rw
-    username: spid
-    password:
-    hikari:
-      poolName: Hikari
-      auto-commit: false
-  jpa:
-    database-platform: tech.jhipster.domain.util.FixedPostgreSQL10Dialect
+#  datasource:
+#    type: com.zaxxer.hikari.HikariDataSource
+#    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+#    url: jdbc:tc:postgresql:13.4:///spid?TC_TMPFS=/testtmpfs:rw
+#    username: spid
+#    password:
+#    hikari:
+#      poolName: Hikari
+#      auto-commit: false
+#  jpa:
+#    database-platform: tech.jhipster.domain.util.FixedPostgreSQL10Dialect

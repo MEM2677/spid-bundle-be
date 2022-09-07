@@ -7,7 +7,7 @@
 
     <groupId>com.entando.idp</groupId>
     <artifactId>spid-bundle</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.4</version>
     <packaging>jar</packaging>
     <name>Spid</name>
 
@@ -161,10 +161,10 @@
             <groupId>io.springfox</groupId>
             <artifactId>springfox-bean-validators</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.zaxxer</groupId>-->
+<!--            <artifactId>HikariCP</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -238,10 +238,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -417,10 +413,6 @@
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.liquibase</groupId>-->
-<!--                <artifactId>liquibase-maven-plugin</artifactId>-->
-<!--            </plugin>-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -643,57 +635,6 @@
                         </extraDirectories>
                     </configuration>
                 </plugin>
-<!--                <plugin>-->
-<!--                    <groupId>org.liquibase</groupId>-->
-<!--                    <artifactId>liquibase-maven-plugin</artifactId>-->
-<!--                    <version>${liquibase.version}</version>-->
-<!--                    <configuration>-->
-<!--                        <changeLogFile>${project.basedir}/src/main/resources/config/liquibase/master.xml</changeLogFile>-->
-<!--                        <diffChangeLogFile>${project.basedir}/src/main/resources/config/liquibase/changelog/${maven.build.timestamp}_changelog.xml</diffChangeLogFile>-->
-<!--                        <driver>org.h2.Driver</driver>-->
-<!--                        <url>jdbc:h2:file:${project.build.directory}/h2db/db/spid</url>-->
-<!--                        <defaultSchemaName/>-->
-<!--                        <username>spid</username>-->
-<!--                        <password/>-->
-<!--                        <referenceUrl>hibernate:spring:com.entando.spid.domain?dialect=org.hibernate.dialect.H2Dialect&amp;hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&amp;hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy</referenceUrl>-->
-<!--                        <verbose>true</verbose>-->
-<!--                        <logging>debug</logging>-->
-<!--                        <contexts>!test</contexts>-->
-<!--                        <diffExcludeObjects>oauth_access_token, oauth_approvals, oauth_client_details, oauth_client_token, oauth_code, oauth_refresh_token</diffExcludeObjects>-->
-<!--                    </configuration>-->
-<!--                    <dependencies>-->
-<!--                        <dependency>-->
-<!--                            <groupId>org.liquibase</groupId>-->
-<!--                            <artifactId>liquibase-core</artifactId>-->
-<!--                            <version>${liquibase.version}</version>-->
-<!--                        </dependency>-->
-<!--                        <dependency>-->
-<!--                            <groupId>org.liquibase.ext</groupId>-->
-<!--                            <artifactId>liquibase-hibernate5</artifactId>-->
-<!--                            <version>${liquibase-hibernate5.version}</version>-->
-<!--                        </dependency>-->
-<!--                        <dependency>-->
-<!--                            <groupId>org.springframework.boot</groupId>-->
-<!--                            <artifactId>spring-boot-starter-data-jpa</artifactId>-->
-<!--                            <version>${spring-boot.version}</version>-->
-<!--                        </dependency>-->
-<!--                        <dependency>-->
-<!--                            <groupId>javax.validation</groupId>-->
-<!--                            <artifactId>validation-api</artifactId>-->
-<!--                            <version>${validation-api.version}</version>-->
-<!--                        </dependency>-->
-<!--                        <dependency>-->
-<!--                            <groupId>org.javassist</groupId>-->
-<!--                            <artifactId>javassist</artifactId>-->
-<!--                            <version>${javassist.version}</version>-->
-<!--                        </dependency>-->
-<!--                        <dependency>-->
-<!--                            <groupId>com.h2database</groupId>-->
-<!--                            <artifactId>h2</artifactId>-->
-<!--                            <version>${h2.version}</version>-->
-<!--                        </dependency>-->
-<!--                    </dependencies>-->
-<!--                </plugin>-->
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>${maven-clean-plugin.version}</version>
