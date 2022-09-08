@@ -2,40 +2,26 @@ package com.entando.spid.web.rest;
 
 import com.entando.spid.domain.Idp;
 import com.entando.spid.service.IdpService;
-import com.entando.spid.service.criteria.SpidCriteria;
+import com.entando.spid.service.KeycloakService;
 import com.entando.spid.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
-import tech.jhipster.web.util.PaginationUtil;
-import tech.jhipster.web.util.ResponseUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * REST controller for managing {@link Idp}.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/spid")
 public class SpidResource {
 
     private final Logger log = LoggerFactory.getLogger(SpidResource.class);
@@ -46,11 +32,26 @@ public class SpidResource {
     private String applicationName;
 
     private final IdpService idpService;
+    private final KeycloakService keycloakService;
 
 
-    public SpidResource(IdpService idpService) {
+    public SpidResource(IdpService idpService, KeycloakService keycloakService) {
         this.idpService = idpService;
+        this.keycloakService = keycloakService;
     }
+
+
+//    @PostMapping("/configure")
+//    public ResponseEntity<Boolean> configure() throws URISyntaxException {
+//        log.debug("REST request to configure Keycloak");
+//
+//        success = keycloakService.configure();
+//        return ResponseEntity
+//            .created(new URI("/api/spids/" + result.getId()))
+//            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+//            .body(true);
+//    }
+
 
     /**
      * {@code POST  /spids} : Create a new idp.
@@ -58,7 +59,7 @@ public class SpidResource {
      * @param idp the idp to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new idp, or with status {@code 400 (Bad Request)} if the idp has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
+     *//*
     @PostMapping("/spids")
     public ResponseEntity<Idp> createSpid(@RequestBody Idp idp) throws URISyntaxException {
         log.debug("REST request to save Idp : {}", idp);
@@ -70,7 +71,7 @@ public class SpidResource {
             .created(new URI("/api/spids/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
-    }
+    }*/
 
     /**
      * {@code PUT  /spids/:id} : Updates an existing idp.
@@ -81,7 +82,7 @@ public class SpidResource {
      * or with status {@code 400 (Bad Request)} if the idp is not valid,
      * or with status {@code 500 (Internal Server Error)} if the idp couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
+     *//*
     @PutMapping("/spids/{id}")
     public ResponseEntity<Idp> updateSpid(@PathVariable(value = "id", required = false) final Long id, @RequestBody Idp idp)
         throws Throwable {
@@ -99,7 +100,7 @@ public class SpidResource {
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, idp.getId().toString()))
             .body(result);
-    }
+    }*/
 
     /**
      * {@code PATCH  /spids/:id} : Partial updates given fields of an existing idp, field will ignore if it is null
@@ -111,7 +112,7 @@ public class SpidResource {
      * or with status {@code 404 (Not Found)} if the idp is not found,
      * or with status {@code 500 (Internal Server Error)} if the idp couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
+     *//*
     @PatchMapping(value = "/spids/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public ResponseEntity<Idp> partialUpdateSpid(@PathVariable(value = "id", required = false) final Long id, @RequestBody Idp idp)
         throws URISyntaxException {
@@ -131,6 +132,7 @@ public class SpidResource {
             HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, idp.getId().toString())
         );
     }
+    */
 
     /**
      * {@code GET  /spids} : get all the spids.
@@ -138,7 +140,7 @@ public class SpidResource {
      * @param pageable the pagination information.
      * @param criteria the criteria which the requested entities should match.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of spids in body.
-     */
+     *//*
     @GetMapping("/spids")
     public ResponseEntity<List<Idp>> getAllSpids(SpidCriteria criteria, Pageable pageable) {
         log.debug("REST request to get Spids by criteria: {}", criteria);
@@ -146,39 +148,29 @@ public class SpidResource {
         page.getContent().stream().forEach(c -> System.out.println(c.getConfig()));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
-    }
+    }*/
 
-    /**
-     * {@code GET  /spids/count} : count all the spids.
-     *
-     * @param criteria the criteria which the requested entities should match.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
-     */
-    @GetMapping("/spids/count")
-    public ResponseEntity<Long> countSpids(SpidCriteria criteria) {
-        log.debug("REST request to count Spids by criteria: {}", criteria);
-        return ResponseEntity.ok().body(2677L);
-    }
+
 
     /**
      * {@code GET  /spids/:id} : get the "id" spid.
      *
      * @param id the id of the spid to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the spid, or with status {@code 404 (Not Found)}.
-     */
+     */ /*
     @GetMapping("/spids/{id}")
     public ResponseEntity<Idp> getSpid(@PathVariable Long id) {
         log.debug("REST request to get Idp : {}", id);
         Optional<Idp> spid = null;
         return ResponseUtil.wrapOrNotFound(spid);
-    }
+    } */
 
     /**
      * {@code DELETE  /spids/:id} : delete the "id" spid.
      *
      * @param id the id of the spid to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
-     */
+     */ /*
     @DeleteMapping("/spids/{id}")
     public ResponseEntity<Void> deleteSpid(@PathVariable Long id) {
         log.debug("REST request to delete Idp : {}", id);
@@ -187,5 +179,6 @@ public class SpidResource {
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
-    }
+    } */
+
 }

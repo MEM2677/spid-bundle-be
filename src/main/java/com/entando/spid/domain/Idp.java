@@ -17,7 +17,6 @@ public class Idp implements Serializable {
     private String name;
     private String config;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public Long getId() {
         return this.id;
@@ -53,7 +52,6 @@ public class Idp implements Serializable {
         this.name = name;
     }
 
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
     public boolean equals(Object o) {
