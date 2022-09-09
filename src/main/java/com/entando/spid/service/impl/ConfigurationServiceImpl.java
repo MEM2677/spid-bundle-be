@@ -2,20 +2,29 @@ package com.entando.spid.service.impl;
 
 import com.entando.spid.config.ApplicationProperties;
 import com.entando.spid.service.ConfigurationService;
-import com.entando.spid.service.dto.ConnectionInfo;
+import com.entando.spid.service.KeycloakService;
+import com.entando.spid.service.dto.ConnectionClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ConfigurationServiceImpl implements ConfigurationService {
 
+    private final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
+
     private final ApplicationProperties config;
 
-    public ConfigurationServiceImpl(ApplicationProperties config) {
+    private final KeycloakService keycloakService;
+
+    public ConfigurationServiceImpl(ApplicationProperties config, KeycloakService keycloakService) {
         this.config = config;
+        this.keycloakService = keycloakService;
     }
 
     @Override
-    public ConnectionInfo getConnection() {
+    public ConnectionClient getConnection() {
         String authUrl = config.getKeycloakAuthUrl();
 
         // get rid of trailing slashes from URL
@@ -24,7 +33,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             config.setKeycloakAuthUrl(authUrl);
         }
 
-        ConnectionInfo connection = new ConnectionInfo(authUrl);
+        ConnectionClient connection = new ConnectionClient(authUrl);
         connection.setLogin(config.getKeycloakClientId(), config.getKeycloakClientSecret());
         connection.setRealm(config.getKeycloakRealm());
         return connection;
@@ -35,9 +44,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return config;
     }
 
-    @Override
-    public String getKeycloakAuthUrl() {
-        return config.getKeycloakAuthUrl();
+    @Scheduled(fixedRate = Long.MAX_VALUE, initialDelay = 2000)
+    public void trampoline() {
+
+        if (config.getSpidConfigActive()) {
+            logger.debug("Launching automatic configuration");
+            ConnectionClient connection = getConnection();
+            keycloakService.configureOrShutDown(connection);
+        } else {
+            logger.warn("Skipping Keycloak configuration as requested");
+        }
     }
 
 }

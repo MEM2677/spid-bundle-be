@@ -5,14 +5,14 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * This DTO contains everything needed to connect with a Keycloak instance
  */
-public class ConnectionInfo {
+public class ConnectionClient {
 
     private String username;
     private String password;
     private String host;
     private String realm;
 
-    public ConnectionInfo(String host) {
+    public ConnectionClient(String host) {
         this.host = host;
     }
 

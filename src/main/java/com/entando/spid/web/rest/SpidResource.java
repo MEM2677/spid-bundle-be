@@ -1,20 +1,21 @@
 package com.entando.spid.web.rest;
 
 import com.entando.spid.domain.Idp;
+import com.entando.spid.domain.ServiceStatus;
+import com.entando.spid.service.ConfigurationService;
 import com.entando.spid.service.IdpService;
 import com.entando.spid.service.KeycloakService;
-import com.entando.spid.web.rest.errors.BadRequestAlertException;
+import com.entando.spid.service.dto.ConnectionClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import tech.jhipster.web.util.HeaderUtil;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
@@ -26,31 +27,71 @@ public class SpidResource {
 
     private final Logger log = LoggerFactory.getLogger(SpidResource.class);
 
-    private static final String ENTITY_NAME = "spidSpid";
+    private static final String ENTITY_NAME = "spid";
 
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
     private final IdpService idpService;
     private final KeycloakService keycloakService;
+    private final ConfigurationService configService;
 
-
-    public SpidResource(IdpService idpService, KeycloakService keycloakService) {
+    public SpidResource(IdpService idpService, KeycloakService keycloakService, ConfigurationService configService) {
         this.idpService = idpService;
         this.keycloakService = keycloakService;
+        this.configService = configService;
     }
 
+    @PostMapping("/configure")
+    public ResponseEntity<Boolean> configure() throws URISyntaxException {
+        log.debug("REST request to configure Keycloak");
 
-//    @PostMapping("/configure")
-//    public ResponseEntity<Boolean> configure() throws URISyntaxException {
-//        log.debug("REST request to configure Keycloak");
-//
-//        success = keycloakService.configure();
-//        return ResponseEntity
-//            .created(new URI("/api/spids/" + result.getId()))
-//            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-//            .body(true);
-//    }
+        try {
+            ConnectionClient connection = configService.getConnection();
+            boolean result = keycloakService.configure(connection);
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(result);
+        } catch (Throwable t) {
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(false);
+        }
+    }
+
+    @PostMapping("/revert")
+    public ResponseEntity<Boolean> revert() throws URISyntaxException {
+        log.debug("REST request to revert Keycloak configuration");
+
+        try {
+            ConnectionClient connection = configService.getConnection();
+            boolean result = keycloakService.revertConfiguration(connection);
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(result);
+        } catch (Throwable t) {
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(false);
+        }
+    }
+
+    @GetMapping("/spids")
+    public ResponseEntity<ServiceStatus> status() {
+        log.debug("REST request to get SPID status");
+
+        try {
+            ConnectionClient connection = configService.getConnection();
+            ServiceStatus result = keycloakService.getStatus(connection);
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(result);
+        } catch (Throwable t) {
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ServiceStatus(null, null));
+        }
+    }
 
 
     /**
