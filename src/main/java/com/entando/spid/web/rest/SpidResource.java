@@ -76,7 +76,7 @@ public class SpidResource {
         }
     }
 
-    @GetMapping("/spids")
+    @GetMapping("/status")
     public ResponseEntity<ServiceStatus> status() {
         log.debug("REST request to get SPID status");
 

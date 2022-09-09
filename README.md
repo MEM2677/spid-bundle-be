@@ -44,9 +44,9 @@ let's have a look to the logs and wait for Keycloak to complete the booting proc
 ent prj xk logs -f
 ```
 
-**NOTE:** Keycloak admin interface can be accessed at [this address](http://localhost:9080/auth/).  
-Username: admin  
-Password: admin
+**NOTE:** Keycloak admin interface can be accessed at [this address](http://localhost:9080/auth/).
+Username: **admin**  
+Password: **admin**
 
 At this point we can start the microservice locally
 
@@ -71,7 +71,9 @@ The organization parameters are discussed [here](#organization-properties).
 
 ## Reverting the configuration
 
-When developing locally reverting the configuration is immediate:
+The fastest way to revert the configuration is through the appropriate [REST API](#rest-api-support) invcation.  
+
+Alternatively, when developing locally please follow these steps:
 
 First we stop the Keycloak instance:
 
@@ -90,7 +92,6 @@ The procedure is as follows:
 - access keycloak admin interface 
 - under the menu `Identity Provider` delete all the providers created
 - under `Authentication` from the dropdown in Flows select `SPID first broker login`: when the page refreshes click the `Delete` button 
-
 
 ## Installation in a cluster
  
@@ -241,6 +242,29 @@ ent prj install --conflict-strategy=OVERRIDE
 
 The latter is used when the bundle is already installed.
 
+## REST API support
+
+By default, the bundle installs the defined configuration on startup; however, it is possible to [disable the automatic installation on startup](#other-environment-variables)
+and demand an external authenticated client to start the configuration process.  
+
+Below the list of the currently supported API:
+
+| Name      | Endpoint                                                        | Type | Arguments | Description                                                                                                                                                                                                |
+|-----------|-----------------------------------------------------------------|------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Configure | [/api/spid/configure](http://localhost:8081/api/spid/configure) | POST | none      | Start the configuration process                                                                                                                                                                            |
+| Revert    | [/api/spid/revert](http://localhost:8081/api/spid/revert)       | POST | none      | Revert the configuration                                                                                                                                                                                   |
+| Status    | [/api/spid/status](http://localhost:8081/api/spid/status)       | GET  | none      | Get the status: if "installed" is true then <br/> the configuration is effective. Remaining fields are the list of providers configured and <br/> whether the custom authentication flow is present or not |
+
+
+For more detailed information access the swagger browser in the [local development environment](http://localhost:8081/swagger-ui/); when requested use the following credentials:  
+
+Username: **user**  
+Password: **user**
+
+### Swagger authentication
+
+
+
 
 ## Organization properties
 
@@ -291,8 +315,8 @@ The following fields are for **private organizations only**:
 
 The following environment variable is also available:
 
-| Variable                | Example | Description                                                                                                               |
-|-------------------------|---------|---------------------------------------------------------------------------------------------------------------------------|
-| SPID_CONFIG_ACTIVE      | true    | Toggle the configuration setup: when false nothing is done                                                                |
+| Variable                | Example | Description                                                                                                  |
+|-------------------------|---------|--------------------------------------------------------------------------------------------------------------|
+| SPID_CONFIG_ACTIVE      | true    | true = configure Keycloak on service startup; false = wait for configure REST API to start the configuration |
 
 
