@@ -1,6 +1,6 @@
 # SPID bundle
 
-This bundle, in its first release, configures Keycloak to use Italian SPID identity provider.
+This bundle configures Keycloak to use Italian SPID identity provider.
 SPID (Sistema Pubblico di Identità Digitale) is a system used by Public Administrations and provate subject
 to authenticate a given user.
 
@@ -25,93 +25,18 @@ Below the list of the Identity providers currently supported:
 | TeamSystem S.p.A.            |
 | TI Trust Technologies S.r.l. |
 
-**NOTE:** a test IdP will also be created to let the organization validate the general setup of the environment against the [test server](https://demo.spid.gov.it/#/login) 
+**NOTE:** a test IdP will also be created to let the organization validate the general setup of the environment against the [test server](https://demo.spid.gov.it/#/login)
 made available by the public administration.
 
-## Local development
-
-Running the bundle for local development is pretty straightforward:
-
-first we start a (local) Keycloak server container
-
-```shell
-ent prj xk start
-```
-
-let's have a look to the logs and wait for Keycloak to complete the booting process. 
-
-```shell
-ent prj xk logs -f
-```
-
-**NOTE:** Keycloak admin interface can be accessed at [this address](http://localhost:9080/auth/).
-Username: **admin**  
-Password: **admin**
-
-At this point we can start the microservice locally
-
-```shell
-ent prj be-test-run
-```
-
-As a result the Keycloak will be configured with pre-defined Italian SPID identity providers.
-
-**NOTE:** Please keep in mind that the microservice configures Keycloak only once: so running the microservice against
-an already configured Keycloak bears no result! To configure SPID again the configuration must be 
-reverted as shown [in this paragraph](#reverting-the-configuration).
-
-### Configuration for the local execution
-
-The default Spring configuration should be ok for the most cases!
-However, the configuration file `src/main/resources/config/application-dev.yml` contains both the parameters of the organization, which are not relevant for local execution, and a little group
-of properties that might be of interest for the developer (eg. default realm, keycloak client id and password etc.).
-
-The organization parameters are discussed [here](#organization-properties). 
-
-
-## Reverting the configuration
-
-The fastest way to revert the configuration is through the invocation of the appropriate [REST API](#rest-api-support).  
-
-Alternatively, when developing locally please follow these steps:
-
-First we stop the Keycloak instance:
-
-```shell
-ent prj xk stop
-```
-
-In the project root of this bundle locate the folder `./src/main/docker/keycloak-db` and delete all the files inside; then restart the Keycloak container
-as shown in the previous step.
-
-In a clustered installation the revert of the configuration must be done manually from the Keycloak admin interface. Obviously this
-method works also for local development.
-
-The procedure is as follows:
-
-- access keycloak admin interface 
-- under the menu `Identity Provider` delete all the providers created
-- under `Authentication` from the dropdown in Flows select `SPID first broker login`: when the page refreshes click the `Delete` button 
-
 ## Installation in a cluster
- 
-When installing in production (or staging) we have two options:
 
-The first step is to prepare Keycloak for the bundle execution; we have two options:  
+Before installing the bundle in production (or staging) we have two options:
 
- - [replace the entire Keycloak image](#replace-keycloak-image)
- - [modify the existing Keycloak installation](#modify-existing-keycloak)
+- replace the entire Keycloak image
+- modify the existing Keycloak installation
 
 **IMPORTANT!** Please be aware that in the latter case the Keycloak theme is not updated so the dynamic list of providers won't be available.  
 The default behaviour of Keycloak in this case is to show a separate button for each SPID identity provider.
-
-
-The next steps are:
-
- - [create the secret containing the configuration of the organization](#create-the-secret-with-organization-data)
- - [create the bundle directory](#create-the-bundle-directory)
- - [install the bundle through the CLI](#installation)
-
 
 ### Replace Keycloak image
 
@@ -132,7 +57,7 @@ ent k scale deploy default-sso-in-namespace-deployment --replicas=0
 ent k set image deployment/default-sso-in-namespace-deployment server-container=entandopsdh/spid-rhsso-theme:0.0.1
 ```
 
-finally restart the deployment 
+finally restart the deployment
 
 ```shell
 ent k scale deploy default-sso-in-namespace-deployment --replicas=1
@@ -144,7 +69,7 @@ This method is necessary when Keycloak image can't be replaced.
 
 #### Installing the SPID provider in Keycloak manually
 
-Locate the pod containing the Keycloak installation: 
+Locate the pod containing the Keycloak installation:
 
 Alternatively you can use the following command from Mac / Linux terminal:
 
@@ -153,7 +78,7 @@ ent k get po -n <NAMESPACE> | grep default-sso-in-namespace-deployment | head -n
 ````
 where NAMESPACE is the namespace where Entando was installed to.
 
-Copy the idp-provider.jar into the Keycloak using the command appropriate for your Keycloak installation:
+Copy the **idp-provider.jar** into the Keycloak using the command appropriate for your Keycloak installation:
 
 - Keycloak 15.1.x community edition:
 
@@ -169,83 +94,41 @@ ent k cp bundle/idp-provider.jar default-sso-in-namespace-deployment-aaabbbccc-d
 
 where `default-sso-in-namespace-deployment-aaabbbccc-dddee` is the name of the Keycloak pod.
 
-You have to wait a few instants to let Keycloak detect the new provider and install it.  
+You have to wait a few instants to let Keycloak detect the new provider and install it.
 
 The result of this operation is to add a new identity
 provider, **SPID**, to the list of those already available. This provider will be configured automatically when the bundle is installed.
 For this reason installing the bundle without these preliminary step will result in an error.
 
-### Create the secret with organization data
+#### Customization of the bundle
 
-To make the process of the creation of the secret easier developers can change the properties inside the script `configure.sh` then execute it with the command
-
-```shell
-sh ./bundle_src/configure.sh <NAMESPACE>
-```
-
-where NAMESPACE is the namespace of the Entando installation of interest.
-
-**NOTE:** this step must be executed at least once, otherwise the bundle installation will fail. 
-
-
-### Create the bundle directory
-
-From the root of the project run the command:
+A secret is used to map the [organization data](#organization-properties). To make the process of configuration easier
+developers can change the properties inside the script `configure.sh` then execute it with the command
 
 ```shell
-mkdir bundle && cp -R bundle_src/* bundle
+sh configure.sh <NAMESPACE>
 ```
 
-This creates the output directory where the bundle will be placed
+where NAMESPACE is the namespace of the Entando installation of interest. 
 
-### Installation
+At this point the bundle can be installed from the Entando hub as usual.
 
-As expected we use the CLI to install in a cluster. The procedure is the same presented [in the official documentation](https://developer.entando.com/next/tutorials/create/pb/publish-project-bundle.html#cli-steps) so:
+## Reverting the configuration
 
-```shell
-ent prj build
-```
+The fastest way to revert the configuration is through the invocation of the appropriate [REST API](#rest-api-support).
 
-To build the project
+Alternatively, in a clustered installation the revert of the configuration must be done manually from the Keycloak admin interface.
 
-```shell
-ent prj pbs-init
-```
+The procedure is as follows:
 
-To declare the Git repository where the developers want the bundle to be stored
-
-```shell
-ent prj pbs-publish
-```
-
-To push the bundle in the repository
-
-```shell
-ent prj deploy
-```
-
-To finally deploy the bundle in Entando.
-
-At this point it is possible to access the `App Builder` to install the bundle.
-
-Alternatively, using the CLI, execute the command:
-
-```shell
-ent prj install
-```
-
-or
-
-```shell
-ent prj install --conflict-strategy=OVERRIDE
-```
-
-The latter is used when the bundle is already installed.
+- access keycloak admin interface
+- under the menu `Identity Provider` delete all the providers created
+- under `Authentication` from the dropdown in Flows select `SPID first broker login`: when the page refreshes click the `Delete` button
 
 ## REST API support
 
 By default, the bundle installs the defined configuration on startup; however, it is possible to [disable the automatic installation on startup](#other-environment-variables)
-and demand an external authenticated client to start the configuration process.  
+and demand an external authenticated client to start the configuration process.
 
 Below the list of the currently supported API:
 
@@ -256,14 +139,14 @@ Below the list of the currently supported API:
 | Status    | [/api/spid/status](http://localhost:8081/api/spid/status)       | GET  | none      | Get the status: if "installed" is true then <br/> the configuration is effective. Remaining fields are the list of providers configured and <br/> whether the custom authentication flow is present or not |
 
 
-For more detailed information access the swagger browser in the [local development environment](http://localhost:8081/swagger-ui/); when requested use the following credentials:  
+For more detailed information access the swagger browser in the [local development environment](http://localhost:8081/swagger-ui/); when requested use the following credentials:
 
 Username: **user**  
 Password: **user**
 
-## Organization properties
+### Organization properties
 
-These properties are replicated for every identity provider known by the installer.
+Organization properties are replicated for every identity provider known by the installer.
 
 Below the list of the fields shared between private organizations and public administrations:
 
@@ -310,8 +193,7 @@ The following fields are for **private organizations only**:
 
 The following environment variable is also available:
 
-| Variable                | Example | Description                                                                                                  |
-|-------------------------|---------|--------------------------------------------------------------------------------------------------------------|
-| SPID_CONFIG_ACTIVE      | true    | true = configure Keycloak on service startup; false = wait for configure REST API to start the configuration |
-
+| Variable                | Example | Description                                                                                                               |
+|-------------------------|---------|---------------------------------------------------------------------------------------------------------------------------|
+| SPID_CONFIG_ACTIVE      | true    | Toggle the configuration setup: when false nothing is done                                                                |
 
