@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +44,7 @@ public class SpidResource {
     }
 
     @PostMapping("/configure")
+    @PreAuthorize("hasAnyAuthority('spid-admin')")
     public ResponseEntity<Boolean> configure() throws URISyntaxException {
         log.debug("REST request to configure Keycloak");
 
@@ -60,6 +62,7 @@ public class SpidResource {
     }
 
     @PostMapping("/revert")
+    @PreAuthorize("hasAnyAuthority('spid-admin')")
     public ResponseEntity<Boolean> revert() throws URISyntaxException {
         log.debug("REST request to revert Keycloak configuration");
 
@@ -77,6 +80,7 @@ public class SpidResource {
     }
 
     @GetMapping("/status")
+    @PreAuthorize("hasAnyAuthority('spid-admin')")
     public ResponseEntity<ServiceStatus> status() {
         log.debug("REST request to get SPID status");
 

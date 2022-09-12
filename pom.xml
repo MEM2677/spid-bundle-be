@@ -7,7 +7,7 @@
 
     <groupId>com.entando.idp</groupId>
     <artifactId>spid-bundle</artifactId>
-    <version>1.2.4</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>Spid</name>
 
@@ -603,7 +603,7 @@
                             <image>eclipse-temurin:11-jre-focal</image>
                         </from>
                         <to>
-                            <image>jangalian/${project.artifactId}:${project.version}</image>
+                            <image>entandopsdh/${project.artifactId}:${project.version}</image>
                             <tags>
                                 <tag>latest</tag>
                             </tags>

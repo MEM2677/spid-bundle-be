@@ -12,6 +12,12 @@ environmentVariables:
     - name: SPID_CONFIG_ACTIVE
       value: "true"
 
+    -   name: OTHER_CONTACT_IS_SP_PRIVATE
+        valueFrom:
+            secretKeyRef:
+                name: c0a4c5e6-SPID-configuration
+                key: _OTHER_CONTACT_IS_SP_PRIVATE
+
     -   name: ORGANIZATION_NAMES
         valueFrom:
             secretKeyRef:
