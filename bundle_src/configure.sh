@@ -1,6 +1,12 @@
 #!/bin/bash
 
 #
+# Secret name
+#
+
+BUNDLE_ID=c0a4c5e6
+
+#
 # Organization properties
 #
 
@@ -53,7 +59,7 @@ if [ $# -eq 0 ]
     exit 1
 fi
 
-ent k create secret generic c0a4c5e6-spid-configuration --from-literal=_ORGANIZATION_NAMES="${_ORGANIZATION_NAMES}"  \
+ent k create secret generic ${BUNDLE_ID}-spid-configuration --from-literal=_ORGANIZATION_NAMES="${_ORGANIZATION_NAMES}"  \
 --from-literal=_ORGANIZATION_DISPLAY_NAMES="${_ORGANIZATION_DISPLAY_NAMES}" \
 --from-literal=_ORGANIZATION_URLS="${_ORGANIZATION_URLS}" \
 --from-literal=_OTHER_CONTACT_COMPANY="${_OTHER_CONTACT_COMPANY}" \

@@ -256,10 +256,10 @@ Below the list of the currently supported API:
 | Status    | [/api/spid/status](http://localhost:8081/api/spid/status)       | GET  | none      | Get the status: if "installed" is true then <br/> the configuration is effective. Remaining fields are the list of providers configured and <br/> whether the custom authentication flow is present or not |
 
 
-For more detailed information access the swagger browser in the [local development environment](http://localhost:8081/swagger-ui/); when requested use the following credentials:  
+For more detailed information access the swagger browser in the [local development environment](http://localhost:8081/swagger-ui/); when requested use the following credentials on the standard login (not the SPID one!):  
 
-Username: **user**  
-Password: **user**
+Username: **admin**  
+Password: **admin**
 
 ## Organization properties
 
