@@ -185,7 +185,7 @@ sh ./bundle_src/configure.sh <NAMESPACE>
 
 where NAMESPACE is the namespace of the Entando installation of interest.
 
-**NOTE:** this step must be executed at least once, otherwise the bundle installation will fail. 
+**NOTE:** make sure to have the correct _bundle ID_ configured and to execute this script at loeast once, otherwise the installation will fail.
 
 
 ### Create the bundle directory
