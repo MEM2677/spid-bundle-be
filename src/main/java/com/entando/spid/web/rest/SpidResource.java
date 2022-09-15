@@ -1,6 +1,9 @@
 package com.entando.spid.web.rest;
 
+import com.entando.spid.ConfigUtils;
+import com.entando.spid.config.ApplicationProperties;
 import com.entando.spid.domain.Idp;
+import com.entando.spid.domain.Organization;
 import com.entando.spid.domain.ServiceStatus;
 import com.entando.spid.service.ConfigurationService;
 import com.entando.spid.service.IdpService;
@@ -14,10 +17,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URISyntaxException;
+import java.util.Map;
 
 /**
  * REST controller for managing {@link Idp}.
@@ -97,6 +103,29 @@ public class SpidResource {
         }
     }
 
+    @PutMapping("/organization")
+    public ResponseEntity<ApplicationProperties> updateOrganizationProperties(@RequestBody ApplicationProperties properties) {
+        log.debug("Request to update organization properties");
+
+        configService.updateConfiguration(properties);
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(properties);
+    }
+
+    @GetMapping("/organization")
+    public ResponseEntity<ApplicationProperties> getOrganizationProprties() {
+        log.debug("Request to get organization properties");
+
+        ApplicationProperties properties = configService.getConfiguration();
+        System.out.println(">>>\n " + configService.getConfiguration());
+        Map<String, String> envVars = System.getenv();
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(properties);
+    }
 
     /**
      * {@code POST  /spids} : Create a new idp.

@@ -1,11 +1,13 @@
 package com.entando.spid.service.impl;
 
 import com.entando.spid.config.ApplicationProperties;
+import com.entando.spid.domain.Organization;
 import com.entando.spid.service.ConfigurationService;
 import com.entando.spid.service.KeycloakService;
 import com.entando.spid.service.dto.ConnectionClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -14,13 +16,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
-    private final ApplicationProperties config;
+    private ApplicationProperties config;
 
-    private final KeycloakService keycloakService;
+    @Autowired
+    private KeycloakService keycloakService;
 
-    public ConfigurationServiceImpl(ApplicationProperties config, KeycloakService keycloakService) {
+    public ConfigurationServiceImpl(ApplicationProperties config) {
         this.config = config;
-        this.keycloakService = keycloakService;
     }
 
     @Override
@@ -44,9 +46,18 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return config;
     }
 
+    @Override
+    public Organization getOrganization() {
+        return new Organization(config);
+    }
+
+    @Override
+    public void updateConfiguration(ApplicationProperties config) {
+        this.config = config;
+    }
+
     @Scheduled(fixedRate = Long.MAX_VALUE, initialDelay = 2000)
     public void trampoline() {
-
         if (config.getSpidConfigActive()) {
             logger.debug("Launching automatic configuration");
             ConnectionClient connection = getConnection();

@@ -14,7 +14,7 @@ import static com.entando.spid.Constants.KEYCLOAK_NEW_AUTH_FLOW_NAME;
 
 public class ConfigUtils {
 
-
+    @Deprecated
     public static Organization getOrganization() {
         Map<String, String> envVars = System.getenv();
         Organization organization = new Organization();

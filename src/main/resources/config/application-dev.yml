@@ -104,27 +104,28 @@ springfox:
 # ===================================================================
 
 application:
-  spidConfigActive: true
-  otherContactIsSpPrivate: true
+  spidConfigActive: ${SPID_CONFIG_ACTIVE:false}
+  otherContactIsSpPrivate: ${OTHER_CONTACT_IS_SP_PRIVATE:true}
 
-  billingContactCompany: Entando
-  billingContactEmail: bastachesia@gmail.com
-  billingContactPhone: +395556935632
-  billingContactRegistryName: Entando
-  billingContactSiteAddress: Piazza Salento
-  billingContactSiteCity: Cagliari
-  billingContactSiteCountry: IT
-  billingContactSiteNumber: 9
-  billingContactSiteProvince: CA
-  billingContactSiteZipCode: 09127
-  organizationDisplayNames: en|Entando, it|Entando
-  organizationNames: en|Entando, it|Entando
-  organizationUrls: it|https://forumpa.apps.psdemo.eng-entando.com/entando-de-app/, en|https://forumpa.apps.psdemo.eng-entando.com/entando-de-app/
-  otherContactCompany: Entando
-  otherContactEmail: bastachesia@gmail.com
-  otherContactFiscalCode:
-  otherContactPhone: +395556935632
-  otherContactVatNumber: IT03264290929
+  billingContactCompany: ${BILLING_CONTACT_COMPANY:Entando}
+  billingContactEmail: ${BILLING_CONTACT_EMAIL:bastachesia@gmail.com}
+  billingContactPhone: ${BILLING_CONTACT_PHONE:+395556935632}
+  billingContactRegistryName: ${BILLING_CONTACT_REGISTRY_NAME:Entando}
+  billingContactSiteAddress: ${BILLING_CONTACT_SITE_ADDRESS:Piazza Salento}
+  billingContactSiteCity: ${BILLING_CONTACT_SITE_CITY:Cagliari}
+  billingContactSiteCountry: ${BILLING_CONTACT_SITE_COUNTRY:IT}
+  billingContactSiteNumber: ${BILLING_CONTACT_SITE_NUMBER:9}
+  billingContactSiteProvince: ${BILLING_CONTACT_SITE_PROVINCE:CA}
+  billingContactSiteZipCode: ${BILLING_CONTACT_SITE_ZIP_CODE:09127}
+  organizationDisplayNames: ${ORGANIZATION_DISPLAY_NAMES:en|Entando, it|Entando}
+  organizationNames: ${ORGANIZATION_NAMES:en|Entando, it|Entando}
+  organizationUrls: ${ORGANIZATION_URLS:it|https://forumpa.apps.psdemo.eng-entando.com/entando-de-app/, en|https://forumpa.apps.psdemo.eng-entando.com/entando-de-app/}
+  otherContactCompany: ${OTHER_CONTACT_COMPANY:Entando}
+  otherContactEmail: ${OTHER_CONTACT_EMAIL:bastachesia@gmail.com}
+  otherContactFiscalCode: ${OTHER_CONTACT_FISCAL_CODE:}
+  otherContactPhone: ${OTHER_CONTACT_PHONE:+395556935632}
+  otherContactVatNumber: ${OTHER_CONTACT_VAT_NUMBER:IT03264290929}
+  otherContactIpaCode: ${OTHER_CONTACT_IPA_CODE:}
 
 #
 # For local development ONLY

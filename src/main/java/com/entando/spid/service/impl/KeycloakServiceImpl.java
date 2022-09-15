@@ -9,6 +9,7 @@ import com.entando.spid.domain.keycloak.Client;
 import com.entando.spid.domain.keycloak.Execution;
 import com.entando.spid.domain.keycloak.IdentityProvider;
 import com.entando.spid.domain.keycloak.Token;
+import com.entando.spid.service.ConfigurationService;
 import com.entando.spid.service.IdpService;
 import com.entando.spid.service.KeycloakService;
 import com.entando.spid.service.dto.ConnectionClient;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -44,6 +46,9 @@ public class KeycloakServiceImpl implements KeycloakService {
     private final Logger logger = LoggerFactory.getLogger(KeycloakServiceImpl.class);
 
     private final IdpService idpService;
+
+    @Autowired
+    private ConfigurationService configurationService;
 
     private final ApplicationContext appContext;
 
@@ -174,7 +179,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
     @Override
     public boolean configure(ConnectionClient connection) {
-        final Organization organization = ConfigUtils.getOrganization();
+        final Organization organization = configurationService.getOrganization();
         Execution[] executions;
         Map<String, String> envVars = System.getenv();
 

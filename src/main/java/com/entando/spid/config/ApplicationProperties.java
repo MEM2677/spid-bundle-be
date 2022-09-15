@@ -1,5 +1,6 @@
 package com.entando.spid.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -8,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Properties are configured in the {@code application.yml} file.
  * See {@link tech.jhipster.config.JHipsterProperties} for a good example.
  */
-@ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "application", ignoreUnknownFields = true)
 public class ApplicationProperties {
 
 //    @Value("#{systemEnvironment['BILLING_CONTACT_COMPANY'] ?: 'defaultCOMPANY'}")
@@ -29,6 +30,7 @@ public class ApplicationProperties {
     private String otherContactEmail;
     private String otherContactFiscalCode;
     private Boolean otherContactIsSpPrivate;
+    private String otherContactIpaCode;
     private String otherContactPhone;
     private String otherContactVatNumber;
 
@@ -232,4 +234,42 @@ public class ApplicationProperties {
         this.keycloakAuthUrl = keycloakAuthUrl;
     }
 
+    public String getOtherContactIpaCode() {
+        return otherContactIpaCode;
+    }
+
+    public void setOtherContactIpaCode(String otherContactIpaCode) {
+        this.otherContactIpaCode = otherContactIpaCode;
+    }
+
+    @Override
+    public String toString() {
+        return "ApplicationProperties{" +
+            "billingContactCompany='" + billingContactCompany + '\'' +
+            ", billingContactEmail='" + billingContactEmail + '\'' +
+            ", billingContactPhone='" + billingContactPhone + '\'' +
+            ", billingContactRegistryName='" + billingContactRegistryName + '\'' +
+            ", billingContactSiteAddress='" + billingContactSiteAddress + '\'' +
+            ", billingContactSiteCity='" + billingContactSiteCity + '\'' +
+            ", billingContactSiteCountry='" + billingContactSiteCountry + '\'' +
+            ", billingContactSiteNumber='" + billingContactSiteNumber + '\'' +
+            ", billingContactSiteProvince='" + billingContactSiteProvince + '\'' +
+            ", billingContactSiteZipCode='" + billingContactSiteZipCode + '\'' +
+            ", organizationDisplayNames='" + organizationDisplayNames + '\'' +
+            ", organizationNames='" + organizationNames + '\'' +
+            ", organizationUrls='" + organizationUrls + '\'' +
+            ", otherContactCompany='" + otherContactCompany + '\'' +
+            ", otherContactEmail='" + otherContactEmail + '\'' +
+            ", otherContactFiscalCode='" + otherContactFiscalCode + '\'' +
+            ", otherContactIsSpPrivate=" + otherContactIsSpPrivate +
+            ", otherContactIpaCode='" + otherContactIpaCode + '\'' +
+            ", otherContactPhone='" + otherContactPhone + '\'' +
+            ", otherContactVatNumber='" + otherContactVatNumber + '\'' +
+            ", spidConfigActive=" + spidConfigActive +
+            ", keycloakRealm='" + keycloakRealm + '\'' +
+            ", keycloakClientId='" + keycloakClientId + '\'' +
+            ", keycloakClientSecret='" + keycloakClientSecret + '\'' +
+            ", keycloakAuthUrl='" + keycloakAuthUrl + '\'' +
+            '}';
+    }
 }

@@ -1,13 +1,39 @@
 package com.entando.spid.domain;
 
+import com.entando.spid.config.ApplicationProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * PAY ATTENTION: the properties match those of the JSON payload needed by Keycloak when creating a new IdP
+ * PAY ATTENTION: the properties match those of the JSON payload needed by Keycloak when creating a new provider!
  */
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Organization {
+
+    public Organization() {}
+
+    public Organization(ApplicationProperties properties) {
+        organizationNames=properties.getOrganizationNames();
+        organizationDisplayNames=properties.getOrganizationDisplayNames();
+        organizationUrls=properties.getOrganizationUrls();
+        otherContactCompany=properties.getOtherContactCompany();
+        otherContactPhone=properties.getOtherContactPhone();
+        otherContactEmail=properties.getOtherContactEmail();
+        otherContactFiscalCode=properties.getOtherContactFiscalCode();
+        otherContactIsSpPrivate=properties.getOtherContactIsSpPrivate().toString();
+        otherContactIpaCode=properties.getOtherContactIpaCode();
+        otherContactVatNumber=properties.getOtherContactVatNumber();
+        billingContactCompany=properties.getBillingContactCompany();
+        billingContactPhone=properties.getBillingContactPhone();
+        billingContactEmail=properties.getBillingContactEmail();
+        billingContactRegistryName=properties.getBillingContactRegistryName();
+        billingContactSiteAddress=properties.getBillingContactSiteAddress();
+        billingContactSiteNumber=properties.getBillingContactSiteNumber();
+        billingContactSiteCity=properties.getBillingContactSiteCity();
+        billingContactSiteZipCode=properties.getBillingContactSiteZipCode();
+        billingContactSiteProvince=properties.getBillingContactSiteProvince();
+        billingContactSiteCountry=properties.getBillingContactSiteCountry();
+    }
 
     private String organizationNames;
     private String organizationDisplayNames;

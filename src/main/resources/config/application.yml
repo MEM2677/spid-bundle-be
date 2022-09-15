@@ -228,6 +228,7 @@ application:
   otherContactFiscalCode: ${OTHER_CONTACT_FISCAL_CODE}
   otherContactPhone: ${OTHER_CONTACT_PHONE}
   otherContactVatNumber: ${OTHER_CONTACT_VAT_NUMBER}
+  otherContactIpaCode: ${OTHER_CONTACT_IPA_CODE}
 
 
 # Taken from container
