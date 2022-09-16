@@ -123,7 +123,7 @@ Run the following command to replace Keycloak image
 - For Keycloak community 15.1.x:
 ```shell
 ent k scale deploy default-sso-in-namespace-deployment --replicas=0
-ent k set image deployment/default-sso-in-namespace-deployment server-container=entandopsdh/
+ent k set image deployment/default-sso-in-namespace-deployment server-container=entandopsdh/spid-keycloak-theme:0.0.2
 ```
 
 - For Red HAT SSO 7:

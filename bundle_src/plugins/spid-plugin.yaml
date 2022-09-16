@@ -118,3 +118,8 @@ environmentVariables:
             secretKeyRef:
                 name: c0a4c5e6-SPID-configuration
                 key: _BILLING_CONTACT_SITE_COUNTRY
+    -   name: OTHER_CONTACT_IPA_CODE
+        valueFrom:
+            secretKeyRef:
+                name: c0a4c5e6-spid-configuration
+                key: _OTHER_CONTACT_IPA_CODE
