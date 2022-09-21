@@ -104,6 +104,7 @@ public class SpidResource {
     }
 
     @PutMapping("/organization")
+    @PreAuthorize("hasAnyAuthority('spid-admin')")
     public ResponseEntity<ApplicationProperties> updateOrganizationProperties(@RequestBody ApplicationProperties properties) {
         log.debug("Request to update organization properties");
 
@@ -115,6 +116,7 @@ public class SpidResource {
     }
 
     @GetMapping("/organization")
+    @PreAuthorize("hasAnyAuthority('spid-admin')")
     public ResponseEntity<ApplicationProperties> getOrganizationProprties() {
         log.debug("Request to get organization properties");
 
