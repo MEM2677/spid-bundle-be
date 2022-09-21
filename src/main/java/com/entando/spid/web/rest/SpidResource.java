@@ -1,14 +1,13 @@
 package com.entando.spid.web.rest;
 
-import com.entando.spid.ConfigUtils;
 import com.entando.spid.config.ApplicationProperties;
-import com.entando.spid.domain.Idp;
-import com.entando.spid.domain.Organization;
+import com.entando.spid.domain.Template;
 import com.entando.spid.domain.ServiceStatus;
 import com.entando.spid.service.ConfigurationService;
-import com.entando.spid.service.IdpService;
+import com.entando.spid.service.TemplateService;
 import com.entando.spid.service.KeycloakService;
 import com.entando.spid.service.dto.ConnectionClient;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +25,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
- * REST controller for managing {@link Idp}.
+ * REST controller for managing {@link Template}.
  */
 @RestController
 @RequestMapping("/api/spid")
@@ -39,12 +38,12 @@ public class SpidResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
-    private final IdpService idpService;
+    private final TemplateService templateService;
     private final KeycloakService keycloakService;
     private final ConfigurationService configService;
 
-    public SpidResource(IdpService idpService, KeycloakService keycloakService, ConfigurationService configService) {
-        this.idpService = idpService;
+    public SpidResource(TemplateService templateService, KeycloakService keycloakService, ConfigurationService configService) {
+        this.templateService = templateService;
         this.keycloakService = keycloakService;
         this.configService = configService;
     }
@@ -104,6 +103,7 @@ public class SpidResource {
     }
 
     @PutMapping("/organization")
+    @PreAuthorize("hasAnyAuthority('spid-admin')")
     public ResponseEntity<ApplicationProperties> updateOrganizationProperties(@RequestBody ApplicationProperties properties) {
         log.debug("Request to update organization properties");
 
@@ -115,17 +115,52 @@ public class SpidResource {
     }
 
     @GetMapping("/organization")
-    public ResponseEntity<ApplicationProperties> getOrganizationProprties() {
+    @PreAuthorize("hasAnyAuthority('spid-admin')")
+    public ResponseEntity<ApplicationProperties> getOrganizationProperties() {
         log.debug("Request to get organization properties");
 
         ApplicationProperties properties = configService.getConfiguration();
-        System.out.println(">>>\n " + configService.getConfiguration());
         Map<String, String> envVars = System.getenv();
         return ResponseEntity
             .status(HttpStatus.CREATED)
             //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(properties);
     }
+
+    @PostMapping("/template")
+    @PreAuthorize("hasAnyAuthority('spid-admin')")
+    public ResponseEntity<Template> addUpdateTemplate(@RequestBody Template template) {
+        log.debug("Request to add a new provider or update an existing one");
+        templateService.updateTemplate(template);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(template);
+    }
+
+    @GetMapping("/export")
+    @PreAuthorize("hasAnyAuthority('spid-admin')")
+    public ResponseEntity<String> exportTemplates() {
+        log.debug("Request to export provider templates");
+        String json = templateService.exportTemplates();
+        return ResponseEntity
+            .status(StringUtils.isNotBlank(json) ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR)
+            //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(json);
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasAnyAuthority('spid-admin')")
+    public ResponseEntity<Boolean> importTemplates(@RequestBody Template[] templates) {
+        log.debug("Request to export provider templates");
+
+        boolean updated = templateService.importTemplates(templates);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(updated);
+    }
+
 
     /**
      * {@code POST  /spids} : Create a new idp.
@@ -135,12 +170,12 @@ public class SpidResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      *//*
     @PostMapping("/spids")
-    public ResponseEntity<Idp> createSpid(@RequestBody Idp idp) throws URISyntaxException {
-        log.debug("REST request to save Idp : {}", idp);
+    public ResponseEntity<Template> createSpid(@RequestBody Template idp) throws URISyntaxException {
+        log.debug("REST request to save Template : {}", idp);
         if (idp.getId() != null) {
             throw new BadRequestAlertException("A new idp cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        Idp result = null;
+        Template result = null;
         return ResponseEntity
             .created(new URI("/api/spids/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -158,9 +193,9 @@ public class SpidResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      *//*
     @PutMapping("/spids/{id}")
-    public ResponseEntity<Idp> updateSpid(@PathVariable(value = "id", required = false) final Long id, @RequestBody Idp idp)
+    public ResponseEntity<Template> updateSpid(@PathVariable(value = "id", required = false) final Long id, @RequestBody Template idp)
         throws Throwable {
-        log.debug("REST request to update Idp : {}, {}", id, idp);
+        log.debug("REST request to update Template : {}, {}", id, idp);
         if (idp.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
@@ -169,7 +204,7 @@ public class SpidResource {
         }
 
 
-        Idp result = null;
+        Template result = null;
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, idp.getId().toString()))
@@ -188,9 +223,9 @@ public class SpidResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      *//*
     @PatchMapping(value = "/spids/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<Idp> partialUpdateSpid(@PathVariable(value = "id", required = false) final Long id, @RequestBody Idp idp)
+    public ResponseEntity<Template> partialUpdateSpid(@PathVariable(value = "id", required = false) final Long id, @RequestBody Template idp)
         throws URISyntaxException {
-        log.debug("REST request to partial update Idp partially : {}, {}", id, idp);
+        log.debug("REST request to partial update Template partially : {}, {}", id, idp);
         if (idp.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
@@ -199,7 +234,7 @@ public class SpidResource {
         }
 
 
-        Optional<Idp> result = null;
+        Optional<Template> result = null;
 
         return ResponseUtil.wrapOrNotFound(
             result,
@@ -216,9 +251,9 @@ public class SpidResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of spids in body.
      *//*
     @GetMapping("/spids")
-    public ResponseEntity<List<Idp>> getAllSpids(SpidCriteria criteria, Pageable pageable) {
+    public ResponseEntity<List<Template>> getAllSpids(SpidCriteria criteria, Pageable pageable) {
         log.debug("REST request to get Spids by criteria: {}", criteria);
-        Page<Idp> page = null;
+        Page<Template> page = null;
         page.getContent().stream().forEach(c -> System.out.println(c.getConfig()));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
@@ -233,9 +268,9 @@ public class SpidResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the spid, or with status {@code 404 (Not Found)}.
      */ /*
     @GetMapping("/spids/{id}")
-    public ResponseEntity<Idp> getSpid(@PathVariable Long id) {
-        log.debug("REST request to get Idp : {}", id);
-        Optional<Idp> spid = null;
+    public ResponseEntity<Template> getSpid(@PathVariable Long id) {
+        log.debug("REST request to get Template : {}", id);
+        Optional<Template> spid = null;
         return ResponseUtil.wrapOrNotFound(spid);
     } */
 
@@ -247,7 +282,7 @@ public class SpidResource {
      */ /*
     @DeleteMapping("/spids/{id}")
     public ResponseEntity<Void> deleteSpid(@PathVariable Long id) {
-        log.debug("REST request to delete Idp : {}", id);
+        log.debug("REST request to delete Template : {}", id);
 
         return ResponseEntity
             .noContent()

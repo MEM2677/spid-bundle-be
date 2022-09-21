@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Properties specific to Idp.
+ * Properties specific to Template.
  * <p>
  * Properties are configured in the {@code application.yml} file.
  * See {@link tech.jhipster.config.JHipsterProperties} for a good example.

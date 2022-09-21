@@ -1,6 +1,6 @@
 package com.entando.spid.config;
 
-import com.entando.spid.domain.Idp;
+import com.entando.spid.domain.Template;
 import com.github.benmanes.caffeine.jcache.configuration.CaffeineConfiguration;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +43,7 @@ public class CacheConfiguration {
     public JCacheManagerCustomizer cacheManagerCustomizer() {
         return cm -> {
             createCache(cm, "oAuth2Authentication");
-            createCache(cm, Idp.class.getName());
+            createCache(cm, Template.class.getName());
             // jhipster-needle-caffeine-add-entry
         };
     }

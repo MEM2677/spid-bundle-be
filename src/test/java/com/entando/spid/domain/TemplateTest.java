@@ -25,21 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = SpidApp.class, loader = AnnotationConfigContextLoader.class)
 @WebAppConfiguration
 @AutoConfigureMockMvc
-class IdpTest {
-
-    @Test
-    void equalsVerifier() throws Exception {
-        TestUtil.equalsVerifier(Idp.class);
-        Idp idp1 = new Idp();
-        idp1.setId(1L);
-        Idp idp2 = new Idp();
-        idp2.setId(idp1.getId());
-        assertThat(idp1).isEqualTo(idp2);
-        idp2.setId(2L);
-        assertThat(idp1).isNotEqualTo(idp2);
-        idp1.setId(null);
-        assertThat(idp1).isNotEqualTo(idp2);
-    }
+class TemplateTest {
 
 
     @Test

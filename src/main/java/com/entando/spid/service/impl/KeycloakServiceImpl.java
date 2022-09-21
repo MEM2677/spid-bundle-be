@@ -1,7 +1,7 @@
 package com.entando.spid.service.impl;
 
 import com.entando.spid.ConfigUtils;
-import com.entando.spid.domain.Idp;
+import com.entando.spid.domain.Template;
 import com.entando.spid.domain.Organization;
 import com.entando.spid.domain.ServiceStatus;
 import com.entando.spid.domain.keycloak.AuthenticationFlow;
@@ -10,7 +10,7 @@ import com.entando.spid.domain.keycloak.Execution;
 import com.entando.spid.domain.keycloak.IdentityProvider;
 import com.entando.spid.domain.keycloak.Token;
 import com.entando.spid.service.ConfigurationService;
-import com.entando.spid.service.IdpService;
+import com.entando.spid.service.TemplateService;
 import com.entando.spid.service.KeycloakService;
 import com.entando.spid.service.dto.ConnectionClient;
 import com.entando.spid.service.dto.MapperAttribute;
@@ -45,15 +45,15 @@ public class KeycloakServiceImpl implements KeycloakService {
 
     private final Logger logger = LoggerFactory.getLogger(KeycloakServiceImpl.class);
 
-    private final IdpService idpService;
+    private final TemplateService templateService;
 
     @Autowired
     private ConfigurationService configurationService;
 
     private final ApplicationContext appContext;
 
-    public KeycloakServiceImpl(IdpService idpService, ApplicationContext appContext) {
-        this.idpService = idpService;
+    public KeycloakServiceImpl(TemplateService templateService, ApplicationContext appContext) {
+        this.templateService = templateService;
         this.appContext = appContext;
     }
 
@@ -110,7 +110,7 @@ public class KeycloakServiceImpl implements KeycloakService {
     @Override
     public boolean revertConfiguration(ConnectionClient connection) {
         boolean flawless = true;
-        List<Idp> templates = idpService.getTemplates();
+        List<Template> templates = templateService.getTemplates();
 
         try {
             final Token token = negotiateToken(connection);
@@ -118,11 +118,11 @@ public class KeycloakServiceImpl implements KeycloakService {
             final String realm = connection.getRealm();
             // 1 -  delete providers
             if (templates != null && !templates.isEmpty()) {
-                for (Idp provider: templates) {
-                    if (deleteProvider(host, token, realm, provider.getName())) {
-                        logger.info("provider {} deleted  successfully", provider.getName());
+                for (Template template : templates) {
+                    if (deleteProvider(host, token, realm, template.getName())) {
+                        logger.info("template {} deleted  successfully", template.getName());
                     } else {
-                        logger.error("error deleting provider {}", provider.getName());
+                        logger.error("error deleting template {}", template.getName());
                     }
                 }
             }
@@ -236,14 +236,14 @@ public class KeycloakServiceImpl implements KeycloakService {
             logger.info("authentication flow successfully configured");
 
             // 6 - configure identity provider
-            List<Idp> templates = idpService.getTemplates();
+            List<Template> templates = templateService.getTemplates();
             if (templates == null || templates.isEmpty()) {
-                logger.error("No Identity Provider templates found!");
+                logger.error("No Identity Template templates found!");
                 return false;
             }
             // 7 - create mapping for SPID profile
             int configured = 0;
-            for (Idp template: templates) {
+            for (Template template: templates) {
                 if (configureProvider(host, token, realm, template, organization)) {
                     configured++;
                 }
@@ -287,13 +287,13 @@ public class KeycloakServiceImpl implements KeycloakService {
      * @param organization the organization data
      * @return true if setup was successful, false otherwise
      */
-    protected boolean configureProvider(String host, Token token, String realm, Idp template, Organization organization) {
+    protected boolean configureProvider(String host, Token token, String realm, Template template, Organization organization) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
             // add the organization properties to the template merging JSON properties
             JSONObject json = ConfigUtils.configureIdp(organization, template.getConfig());
-            // create the Idp Object
+            // create the Template Object
             IdentityProvider idp = objectMapper.readValue(json.toString(), IdentityProvider.class);
             // create configuration
             if (!createIdentityProvider(host, token, realm, idp)) {
@@ -674,11 +674,11 @@ public class KeycloakServiceImpl implements KeycloakService {
     }
 
     /**
-     * Create a new Identity Provider
+     * Create a new Identity Template
      * @param host Keycloak address
      * @param token the SAT or UAT
      * @param realm the target realm
-     * @param idp the new Identity Provider
+     * @param idp the new Identity Template
      * @return true if the new IdP was created
      */
     protected boolean createIdentityProvider(String host, Token token, String realm, IdentityProvider idp) {
