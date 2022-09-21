@@ -78,18 +78,18 @@ ent k get po -n <NAMESPACE> | grep default-sso-in-namespace-deployment | head -n
 ````
 where NAMESPACE is the namespace where Entando was installed to.
 
-Copy the **idp-provider.jar** into the Keycloak using the command appropriate for your Keycloak installation:
+Copy the **spid-provider.jar** into the Keycloak using the command appropriate for your Keycloak installation:
 
 - Keycloak 15.1.x community edition:
 
 ```shell
-ent k cp bundle_src/idp-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/jboss/keycloak/standalone/deployments
+ent k cp bundle/spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/jboss/keycloak/standalone/deployments
 ```
 
 - Red HAT SSO 7:
 
 ```shell
-ent k cp bundle/idp-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/eap/standalone/deployments
+ent k cp bundle/spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/eap/standalone/deployments
 ```
 
 where `default-sso-in-namespace-deployment-aaabbbccc-dddee` is the name of the Keycloak pod.
