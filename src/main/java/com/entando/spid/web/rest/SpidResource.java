@@ -1,13 +1,14 @@
 package com.entando.spid.web.rest;
 
+import com.entando.spid.ConfigUtils;
 import com.entando.spid.config.ApplicationProperties;
-import com.entando.spid.domain.Template;
+import com.entando.spid.domain.Idp;
+import com.entando.spid.domain.Organization;
 import com.entando.spid.domain.ServiceStatus;
 import com.entando.spid.service.ConfigurationService;
-import com.entando.spid.service.TemplateService;
+import com.entando.spid.service.IdpService;
 import com.entando.spid.service.KeycloakService;
 import com.entando.spid.service.dto.ConnectionClient;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -160,7 +161,6 @@ public class SpidResource {
             //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(updated);
     }
-
 
     /**
      * {@code POST  /spids} : Create a new idp.
