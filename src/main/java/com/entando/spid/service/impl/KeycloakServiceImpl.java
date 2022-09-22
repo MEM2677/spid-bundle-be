@@ -292,7 +292,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
         try {
             // add the organization properties to the template merging JSON properties
-            JSONObject json = ConfigUtils.configureIdp(organization, template.getConfig());
+            JSONObject json = ConfigUtils.configureIdentityProvider(organization, template.getConfig());
             // create the Template Object
             IdentityProvider idp = objectMapper.readValue(json.toString(), IdentityProvider.class);
             // create configuration

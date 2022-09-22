@@ -24,5 +24,5 @@ public interface ConfigurationService {
      */
     Organization getOrganization();
 
-    void updateConfiguration(ApplicationProperties config);
+    boolean updateConfiguration(Organization organization);
 }

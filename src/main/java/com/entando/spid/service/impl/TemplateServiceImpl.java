@@ -1,5 +1,6 @@
 package com.entando.spid.service.impl;
 
+import com.entando.spid.ConfigUtils;
 import com.entando.spid.domain.Template;
 import com.entando.spid.service.TemplateService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,12 +14,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static com.entando.spid.Constants.TEMPLATES_PATH;
+import static com.entando.spid.Constants.RESOURCE_TEMPLATES_PATH;
 
 /**
  * Service Implementation for managing {@link Template}.
@@ -33,12 +36,38 @@ public class TemplateServiceImpl implements TemplateService {
 
     public TemplateServiceImpl() {
         try {
-            prepareConfigurationMap(TEMPLATES_PATH);
-            // SAVE THE UPDATABLE FILE
+            // prepare the map containing the templates
+            prepareConfigurationMap(RESOURCE_TEMPLATES_PATH);
+            // if this is the first run we create the local file that mirrors
+            // the configuration from the default configuration, otherwise we load
+            // the templates from the file
+            Path path = ConfigUtils.getProviderFilePath();
+
+            if (Files.exists(path)) {
+                log.info("Loading templates from file {}", path);
+                String json = ConfigUtils.readFile(path);
+                importTemplates(json);
+            } else {
+                log.info("Saving templates to file {}", path);
+                if (!synchronizeTemplates()) {
+                    throw new RuntimeException("error in local file creation");
+                }
+            }
         } catch (Throwable t) {
             templates.clear();
             log.error("Error on service startup ", t);
         }
+    }
+
+    /**
+     * Synchronize template map with local file
+     *
+     * @return true only if the operation is successful
+     */
+    private boolean synchronizeTemplates() {
+        Path path = ConfigUtils.getProviderFilePath();
+        String export = exportTemplates();
+        return ConfigUtils.writeFile(path, export);
     }
 
     @Override
@@ -49,14 +78,17 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public void updateTemplate(Template template) {
+    public boolean updateTemplate(Template template) {
         if (template != null
             && StringUtils.isNotBlank(template.getName())) {
             templates.put(template.getName(), template);
             log.debug("added or updated template '{}'", template.getName());
+            // update template file
+            return synchronizeTemplates();
         } else {
             log.warn("cannot update template!");
         }
+        return false;
     }
 
     @Override
@@ -97,6 +129,7 @@ public class TemplateServiceImpl implements TemplateService {
 
         try {
             if (templates != null) {
+                this.templates.clear();
                 for (Template current: templates) {
                     this.templates.put(current.getName(), current);
                 }

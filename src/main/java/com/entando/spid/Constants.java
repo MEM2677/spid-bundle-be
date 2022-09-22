@@ -5,8 +5,11 @@ import com.entando.spid.service.dto.MapperAttribute;
 
 public interface Constants {
 
-    public static final String TEMPLATE_FILE = "idpTemplates.csv";
-    public static final String TEMPLATES_PATH = "config/template/" + TEMPLATE_FILE;
+    String LOCAL_ORGANIZATION_FILE = "spid-organization.json";
+    String LOCAL_PROVIDER_FILE = "spid-templates.json";
+
+    String RESOURCE_TEMPLATE_FILE = "idpTemplates.csv";
+    String RESOURCE_TEMPLATES_PATH = "config/template/" + RESOURCE_TEMPLATE_FILE;
 
     // keycloak related values - pay attention
     String KEYCLOAK_DEFAULT_AUTH_FLOW = "first broker login";

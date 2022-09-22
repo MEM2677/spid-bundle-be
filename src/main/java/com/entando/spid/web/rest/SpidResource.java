@@ -1,14 +1,14 @@
 package com.entando.spid.web.rest;
 
-import com.entando.spid.ConfigUtils;
 import com.entando.spid.config.ApplicationProperties;
-import com.entando.spid.domain.Idp;
 import com.entando.spid.domain.Organization;
 import com.entando.spid.domain.ServiceStatus;
+import com.entando.spid.domain.Template;
 import com.entando.spid.service.ConfigurationService;
-import com.entando.spid.service.IdpService;
 import com.entando.spid.service.KeycloakService;
+import com.entando.spid.service.TemplateService;
 import com.entando.spid.service.dto.ConnectionClient;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -105,36 +105,34 @@ public class SpidResource {
 
     @PutMapping("/organization")
     @PreAuthorize("hasAnyAuthority('spid-admin')")
-    public ResponseEntity<ApplicationProperties> updateOrganizationProperties(@RequestBody ApplicationProperties properties) {
+    public ResponseEntity<Organization> updateOrganizationProperties(@RequestBody Organization organization) {
         log.debug("Request to update organization properties");
 
-        configService.updateConfiguration(properties);
+        configService.updateConfiguration(organization);
         return ResponseEntity
             .status(HttpStatus.CREATED)
             //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(properties);
+            .body(organization);
     }
 
     @GetMapping("/organization")
     @PreAuthorize("hasAnyAuthority('spid-admin')")
-    public ResponseEntity<ApplicationProperties> getOrganizationProperties() {
+    public ResponseEntity<Organization> getOrganizationProperties() {
         log.debug("Request to get organization properties");
 
-        ApplicationProperties properties = configService.getConfiguration();
-        Map<String, String> envVars = System.getenv();
+        Organization organization = configService.getOrganization();
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(properties);
+            .body(organization);
     }
 
     @PostMapping("/template")
     @PreAuthorize("hasAnyAuthority('spid-admin')")
     public ResponseEntity<Template> addUpdateTemplate(@RequestBody Template template) {
         log.debug("Request to add a new provider or update an existing one");
-        templateService.updateTemplate(template);
+        boolean status = templateService.updateTemplate(template);
         return ResponseEntity
-            .status(HttpStatus.OK)
+            .status(status ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR)
             //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(template);
     }
@@ -146,7 +144,6 @@ public class SpidResource {
         String json = templateService.exportTemplates();
         return ResponseEntity
             .status(StringUtils.isNotBlank(json) ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR)
-            //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(json);
     }
 
@@ -158,7 +155,6 @@ public class SpidResource {
         boolean updated = templateService.importTemplates(templates);
         return ResponseEntity
             .status(HttpStatus.OK)
-            //.headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(updated);
     }
 

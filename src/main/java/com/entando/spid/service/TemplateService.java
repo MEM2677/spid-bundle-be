@@ -17,9 +17,11 @@ public interface TemplateService {
 
     /**
      * Update the template of a single provider
+     *
      * @param template the template to update, identified by the name
+     * @return true if the operation is successful, false otherwise
      */
-    void updateTemplate(Template template);
+    boolean updateTemplate(Template template);
 
     /**
      * Export provider templates

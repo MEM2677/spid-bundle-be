@@ -5,14 +5,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.entando.spid.Constants.KEYCLOAK_ENTANDO_DISPLAY_NAME;
-import static com.entando.spid.Constants.KEYCLOAK_NEW_AUTH_FLOW_NAME;
+import static com.entando.spid.Constants.*;
 
 public class ConfigUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
 
     @Deprecated
     public static Organization getOrganization() {
@@ -43,22 +53,22 @@ public class ConfigUtils {
     }
 
 
-    public static JSONObject configureIdp(Organization organization, String template) throws Throwable {
+    public static JSONObject configureIdentityProvider(Organization organization, String template) throws Throwable {
         ObjectMapper objectMapper = new ObjectMapper();
         String org = objectMapper.writeValueAsString(organization);
         JSONObject json = new JSONObject(template);
         JSONObject data = new JSONObject(org);
-        return configureIdp(data, json, true);
+        return configureIdentityProvider(data, json, true);
     }
 
 
-    public static JSONObject configureIdp(String organization, String template) throws JSONException {
+    public static JSONObject configureIdentityProvider(String organization, String template) throws JSONException {
         JSONObject data = new JSONObject(organization);
         JSONObject json = new JSONObject(template);
-        return configureIdp(data, json, true);
+        return configureIdentityProvider(data, json, true);
     }
 
-    public static JSONObject configureIdp(JSONObject organizationData, JSONObject template, boolean overwrite) throws JSONException {
+    public static JSONObject configureIdentityProvider(JSONObject organizationData, JSONObject template, boolean overwrite) throws JSONException {
         JSONObject config = template.getJSONObject("config");
 
         // copy the organization fields
@@ -94,5 +104,84 @@ public class ConfigUtils {
             }
         }
     }
+
+    /**
+     * Get the home directory for IO
+     * @return
+     */
+    public static String getHomeDirectory() {
+        String userHome = "user.home";
+        String path = System.getProperty(userHome);
+        return path;
+    }
+
+    /**
+     * Get the local path where to store organization properties
+     * @return
+     */
+    public static Path getOrganizationFilePath() {
+        String home = ConfigUtils.getHomeDirectory();
+        Path path = Paths.get(home + File.separator + LOCAL_ORGANIZATION_FILE);
+        return path;
+    }
+
+
+    /**
+     * Get the local path where to store organization properties
+     * @return
+     */
+    public static Path getProviderFilePath() {
+        String home = ConfigUtils.getHomeDirectory();
+        Path path = Paths.get(home + File.separator + LOCAL_PROVIDER_FILE);
+        return path;
+    }
+
+    /**
+     *
+     * @param path the path of the text file to save
+     * @param data
+     * @return
+     */
+    public static boolean writeFile(Path path, String data) {
+        try {
+            // delete existing file
+            if (Files.deleteIfExists(path)) {
+                logger.debug("Deleting existing file {}", path);
+            }
+            // write
+            Files.writeString(path, data, StandardCharsets.UTF_8);
+            logger.info("Wrote configuration in {}", path);
+            return true;
+        } catch (Throwable t) {
+            logger.error("Error writing file " + path, t);
+        }
+        return false;
+    }
+
+    /**
+     * Read the content of a config text file
+     * @param path the path
+     * @return the content of the text file
+     * @throws Throwable in case of any error
+     */
+    public static String readFile(Path path) throws Throwable {
+        StringBuilder sb = new StringBuilder();
+
+        if (path != null && Files.exists(path)) {
+            File file = path.toFile();
+            String in;
+
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+            while ((in = br.readLine()) != null) {
+                sb.append(in);
+                sb.append(System.getProperty("line.separator"));
+            }
+        } else {
+            logger.error("cannot read file {}", path);
+        }
+        return sb.toString();
+    }
+
 
 }
