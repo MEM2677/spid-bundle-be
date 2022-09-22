@@ -32,18 +32,20 @@ public interface TemplateService {
     /**
      * Import provider templates
      *
-     * @param in the JSON of the providers returned by export function
+     * @param in      the JSON of the providers returned by export function
+     * @param persist
      * @return true if the configuration was updated, false otherwise
      */
-    boolean importTemplates(String in);
+    boolean importTemplates(String in, boolean persist);
 
     /**
      * Import provider templates
      *
      * @param templates the themplates to import
+     * @param persist
      * @return true if the configuration was updated, false otherwise
      */
-    boolean importTemplates(Template[] templates);
+    boolean importTemplates(Template[] templates, boolean persist);
 
     /**
      * Read a file from the resources as inputStream

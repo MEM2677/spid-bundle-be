@@ -46,10 +46,10 @@ public class TemplateServiceImpl implements TemplateService {
             if (Files.exists(path)) {
                 log.info("Loading templates from file {}", path);
                 String json = ConfigUtils.readFile(path);
-                importTemplates(json);
+                importTemplates(json, false);
             } else {
                 log.info("Saving templates to file {}", path);
-                if (!synchronizeTemplates()) {
+                if (!persistTemplates()) {
                     throw new RuntimeException("error in local file creation");
                 }
             }
@@ -64,7 +64,7 @@ public class TemplateServiceImpl implements TemplateService {
      *
      * @return true only if the operation is successful
      */
-    private boolean synchronizeTemplates() {
+    private boolean persistTemplates() {
         Path path = ConfigUtils.getProviderFilePath();
         String export = exportTemplates();
         return ConfigUtils.writeFile(path, export);
@@ -84,7 +84,7 @@ public class TemplateServiceImpl implements TemplateService {
             templates.put(template.getName(), template);
             log.debug("added or updated template '{}'", template.getName());
             // update template file
-            return synchronizeTemplates();
+            return persistTemplates();
         } else {
             log.warn("cannot update template!");
         }
@@ -111,12 +111,13 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public boolean importTemplates(String in) {
+    public boolean importTemplates(String in, boolean persist) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
+            this.templates.clear();
             Template[] templates = objectMapper.readValue(in, Template[].class);
-            return importTemplates(templates);
+            return importTemplates(templates, persist);
         } catch (Throwable t) {
             log.error("error importing templates", t);
         }
@@ -124,16 +125,15 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public boolean importTemplates(Template[] templates) {
+    public boolean importTemplates(Template[] templates, boolean persist) {
         boolean updated = false;
 
         try {
             if (templates != null) {
-                this.templates.clear();
                 for (Template current: templates) {
                     this.templates.put(current.getName(), current);
                 }
-                updated = true;
+                updated = !persist ? true : persistTemplates();
             }
         } catch (Throwable t) {
             log.error("error importing template", t);

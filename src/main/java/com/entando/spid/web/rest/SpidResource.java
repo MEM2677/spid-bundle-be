@@ -1,6 +1,5 @@
 package com.entando.spid.web.rest;
 
-import com.entando.spid.config.ApplicationProperties;
 import com.entando.spid.domain.Organization;
 import com.entando.spid.domain.ServiceStatus;
 import com.entando.spid.domain.Template;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URISyntaxException;
-import java.util.Map;
 
 /**
  * REST controller for managing {@link Template}.
@@ -152,7 +150,7 @@ public class SpidResource {
     public ResponseEntity<Boolean> importTemplates(@RequestBody Template[] templates) {
         log.debug("Request to export provider templates");
 
-        boolean updated = templateService.importTemplates(templates);
+        boolean updated = templateService.importTemplates(templates, true);
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(updated);

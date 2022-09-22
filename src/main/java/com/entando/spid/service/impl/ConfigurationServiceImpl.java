@@ -19,7 +19,7 @@ import java.nio.file.Path;
 @Component
 public class ConfigurationServiceImpl implements ConfigurationService {
 
-    private final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
+    private final Logger log = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
     // this contains both organization data and infrastructure data
     private ApplicationProperties config;
@@ -41,10 +41,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             // the configuration from environment variables, otherwise we load
             // the organization data from the file
             if (Files.exists(path)) {
-                logger.info("loading organization data from file {}", path);
+                log.info("loading organization data from file {}", path);
                 String json = ConfigUtils.readFile(path);
                 this.organization = objectMapper.readValue(json, Organization.class);
             } else {
+                log.info("Saving organization data to file {}", path);
                 saveOrganization(path, this.organization);
             }
         } catch (Throwable e) {
@@ -87,7 +88,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             saveOrganization(path, organization);
             return true;
         } catch (Throwable t) {
-            logger.error("error updating organization properties", t);
+            log.error("error updating organization properties", t);
         }
         return false;
     }
@@ -95,11 +96,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Scheduled(fixedRate = Long.MAX_VALUE, initialDelay = 2000)
     public void trampoline() {
         if (config.getSpidConfigActive()) {
-            logger.debug("Launching automatic configuration");
+            log.debug("Launching automatic configuration");
             ConnectionClient connection = getConnection();
             keycloakService.configureOrShutDown(connection);
         } else {
-            logger.warn("Skipping Keycloak configuration as requested");
+            log.warn("Skipping Keycloak configuration as requested");
         }
     }
 
@@ -110,7 +111,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             String json = objectMapper.writeValueAsString(organization);
             ConfigUtils.writeFile(path, json);
         } else {
-            logger.error("cannot write to file " + path);
+            log.error("cannot write to file " + path);
         }
     }
 
