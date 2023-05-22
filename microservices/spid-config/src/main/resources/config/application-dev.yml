@@ -1,0 +1,136 @@
+# ===================================================================
+# Spring Boot configuration for the "dev" profile.
+#
+# This configuration overrides the application.yml file.
+#
+# More information on profiles: https://www.jhipster.tech/profiles/
+# More information on configuration properties: https://www.jhipster.tech/common-application-properties/
+# ===================================================================
+
+# ===================================================================
+# Standard Spring Boot properties.
+# Full reference is available at:
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# ===================================================================
+
+logging:
+  level:
+    ROOT: INFO
+    tech.jhipster: INFO
+    org.hibernate.SQL: INFO
+    com.entando.spid: DEBUG
+
+spring:
+  devtools:
+    restart:
+      enabled: true
+      additional-exclude: static/**,.h2.server.properties
+    livereload:
+      enabled: false # we use Webpack dev server + BrowserSync for livereload
+  jackson:
+    serialization:
+      indent-output: true
+#  datasource:
+#    type: com.zaxxer.hikari.HikariDataSource
+#    url: jdbc:h2:file:./target/h2db/db/spid;DB_CLOSE_DELAY=-1
+#    username: spid
+#    password:
+#    hikari:
+#      poolName: Hikari
+#      auto-commit: false
+#  h2:
+#    console:
+#      # disable spring boot built-in h2-console since we start it manually with correct configuration
+#      enabled: false
+#  jpa:
+#    database-platform: tech.jhipster.domain.util.FixedH2Dialect
+#  liquibase:
+#    # Remove 'faker' if you do not want the sample data to be loaded automatically
+#    contexts: dev, faker
+  messages:
+    cache-duration: PT1S # 1 second, see the ISO 8601 standard
+  thymeleaf:
+    cache: false
+  sleuth:
+    sampler:
+      probability: 1 # report 100% of traces
+  zipkin: # Use the "zipkin" Maven profile to have the Spring Cloud Zipkin dependencies
+    base-url: http://localhost:9411
+    enabled: false
+    locator:
+      discovery:
+        enabled: true
+
+server:
+  port: 8081
+
+# ===================================================================
+# JHipster specific properties
+#
+# Full reference is available at: https://www.jhipster.tech/common-application-properties/
+# ===================================================================
+
+jhipster:
+  cache: # Cache configuration
+    caffeine: # Caffeine configuration
+      time-to-live-seconds: 3600 # By default objects stay 1 hour in the cache. This sets expireAfterWrite in Caffeine (https://github.com/ben-manes/caffeine/wiki/Eviction#time-based)
+      max-entries: 100 # Number of objects in each cache entry
+    # CORS is enabled by default on microservices on entando-blueprint.
+    # If you want to disable it, please comment the configuration below.
+  cors:
+    allowed-origin-patterns: 'http://localhost:[*]'
+    allowed-methods: '*'
+    allowed-headers: '*'
+    exposed-headers: 'Authorization,Link,X-Total-Count'
+    allow-credentials: true
+    max-age: 1800
+  logging:
+    use-json-format: false # By default, logs are not in Json format
+    logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
+      enabled: false
+      host: localhost
+      port: 5000
+      queue-size: 512
+springfox:
+  documentation:
+    enabled: true
+# ===================================================================
+# Application specific properties
+# Add your own application properties here, see the ApplicationProperties class
+# to have type-safe configuration, like in the JHipsterProperties above
+#
+# More documentation is available at:
+# https://www.jhipster.tech/common-application-properties/
+# ===================================================================
+
+application:
+  spidConfigActive: ${SPID_CONFIG_ACTIVE:true}
+  otherContactIsSpPrivate: ${OTHER_CONTACT_IS_SP_PRIVATE:true}
+
+  billingContactCompany: ${BILLING_CONTACT_COMPANY:Entando}
+  billingContactEmail: ${BILLING_CONTACT_EMAIL:bastachesia@gmail.com}
+  billingContactPhone: ${BILLING_CONTACT_PHONE:+395556935632}
+  billingContactRegistryName: ${BILLING_CONTACT_REGISTRY_NAME:Entando}
+  billingContactSiteAddress: ${BILLING_CONTACT_SITE_ADDRESS:Piazza Salento}
+  billingContactSiteCity: ${BILLING_CONTACT_SITE_CITY:Cagliari}
+  billingContactSiteCountry: ${BILLING_CONTACT_SITE_COUNTRY:IT}
+  billingContactSiteNumber: ${BILLING_CONTACT_SITE_NUMBER:9}
+  billingContactSiteProvince: ${BILLING_CONTACT_SITE_PROVINCE:CA}
+  billingContactSiteZipCode: ${BILLING_CONTACT_SITE_ZIP_CODE:09127}
+  organizationDisplayNames: ${ORGANIZATION_DISPLAY_NAMES:en|Entando, it|Entando}
+  organizationNames: ${ORGANIZATION_NAMES:en|Entando, it|Entando}
+  organizationUrls: ${ORGANIZATION_URLS:it|https://forumpa.apps.psdemo.eng-entando.com/entando-de-app/, en|https://forumpa.apps.psdemo.eng-entando.com/entando-de-app/}
+  otherContactCompany: ${OTHER_CONTACT_COMPANY:Entando}
+  otherContactEmail: ${OTHER_CONTACT_EMAIL:bastachesia@gmail.com}
+  otherContactFiscalCode: ${OTHER_CONTACT_FISCAL_CODE:}
+  otherContactPhone: ${OTHER_CONTACT_PHONE:+395556935632}
+  otherContactVatNumber: ${OTHER_CONTACT_VAT_NUMBER:IT03264290929}
+  otherContactIpaCode: ${OTHER_CONTACT_IPA_CODE:}
+
+#
+# For local development ONLY
+#
+  keycloakRealm: jhipster
+  keycloakClientId: internal
+  keycloakClientSecret: internal
+  keycloakAuthUrl: http://localhost:9080/auth/
