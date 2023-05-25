@@ -35,23 +35,24 @@ Running the bundle for local development is pretty straightforward:
 first we start a (local) Keycloak server container
 
 ```shell
-ent prj xk start
+ent bundle svc start keycloak
 ```
 
 let's have a look to the logs and wait for Keycloak to complete the booting process. 
 
 ```shell
-ent prj xk logs -f
+ent bundle svc logs keycloak
 ```
 
-**NOTE:** Keycloak admin interface can be accessed at [this address](http://localhost:9080/auth/).
+**NOTE:** Keycloak admin interface can be accessed at [this address](http://localhost:9080/auth/).  
+
 Username: **admin**  
 Password: **admin**
 
 At this point we can start the microservice locally
 
 ```shell
-ent prj be-test-run
+ent bundle run spid-config 
 ```
 
 As a result the Keycloak will be configured with pre-defined Italian SPID identity providers.
@@ -78,10 +79,10 @@ Alternatively, when developing locally please follow these steps:
 First we stop the Keycloak instance:
 
 ```shell
-ent prj xk stop
+ent bundle svc stop keycloak
 ```
 
-In the project root of this bundle locate the folder `./src/main/docker/keycloak-db` and delete all the files inside; then restart the Keycloak container
+In the project root of this bundle locate the folder `./svc/keycloak/keycloak-db` and delete all the files inside; then restart the Keycloak container
 as shown in the previous step.
 
 In a clustered installation the revert of the configuration must be done manually from the Keycloak admin interface. Obviously this
@@ -180,67 +181,44 @@ For this reason installing the bundle without these preliminary step will result
 To make the process of the creation of the secret easier developers can change the properties inside the script `configure.sh` then execute it with the command
 
 ```shell
-sh ./bundle_src/configure.sh <NAMESPACE>
+sh ./script/configure.sh <NAMESPACE>
 ```
 
 where NAMESPACE is the namespace of the Entando installation of interest.
 
-**NOTE:** make sure to have the correct _bundle ID_ configured and to execute this script at loeast once, otherwise the installation will fail.
-
-
-### Create the bundle directory
-
-From the root of the project run the command:
+**NOTE:** make sure to have the correct _bundle ID_ configured and to execute this script at least once, otherwise the installation will fail.   
+To get the bundle id of your custom repository and organization run the following command
 
 ```shell
-mkdir bundle && cp -R bundle_src/* bundle
+ent ecr get-bundle-id docker://registry.hub.docker.com/<ORGANIZATION>/spid-bundle
 ```
 
-This creates the output directory where the bundle will be placed
+Replace the value in the `configure.sh` script and inside the [environment variables defined in the entando.json](https://developer.entando.com/next/docs/curate/bundle-details.html#microservices-specifications) file
 
 ### Installation
 
-As expected we use the CLI to install in a cluster. The procedure is the same presented [in the official documentation](https://developer.entando.com/next/tutorials/create/pb/publish-project-bundle.html#cli-steps) so:
+As expected we use the CLI to install in a cluster. The procedure is the same presented [in the official documentation](https://developer.entando.com/v7.1/tutorials/create/pb/publish-project-bundle.html#create-and-deploy-a-bundle-project) so:
 
 ```shell
-ent prj build
+ent bundle pack
 ```
 
 To build the project
 
 ```shell
-ent prj pbs-init
+ent bundle publish
 ```
 
-To declare the Git repository where the developers want the bundle to be stored
+**NOTE:** append the switches `--registry registry.hub.docker.com --org my-docker-organization` to customize the registry and the organization
 
 ```shell
-ent prj pbs-publish
-```
-
-To push the bundle in the repository
-
-```shell
-ent prj deploy
+ent bundle deploy
 ```
 
 To finally deploy the bundle in Entando.
 
 At this point it is possible to access the `App Builder` to install the bundle.
 
-Alternatively, using the CLI, execute the command:
-
-```shell
-ent prj install
-```
-
-or
-
-```shell
-ent prj install --conflict-strategy=OVERRIDE
-```
-
-The latter is used when the bundle is already installed.
 
 ## REST API support
 
@@ -317,5 +295,3 @@ The following environment variable is also available:
 | Variable                | Example | Description                                                                                                  |
 |-------------------------|---------|--------------------------------------------------------------------------------------------------------------|
 | SPID_CONFIG_ACTIVE      | true    | true = configure Keycloak on service startup; false = wait for configure REST API to start the configuration |
-
-

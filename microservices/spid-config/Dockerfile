@@ -4,7 +4,7 @@ LABEL org.entando.bundle-name="spid-bundle"
 
 WORKDIR /app
 
-COPY target/spid-bundle-*.jar /app/app.jar
+COPY target/spid-config-*.jar /app/app.jar
 
 CMD ["java", "-jar", "app.jar"]
 

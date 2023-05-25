@@ -30,6 +30,12 @@ spring:
   jackson:
     serialization:
       indent-output: true
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: http://localhost:9080/auth/realms/jhipster
 #  datasource:
 #    type: com.zaxxer.hikari.HikariDataSource
 #    url: jdbc:h2:file:./target/h2db/db/spid;DB_CLOSE_DELAY=-1
