@@ -1,4 +1,4 @@
-# SPID bundle
+# SPID Integration bundle
 
 This bundle, in its first release, configures Keycloak to use Italian SPID identity provider.
 SPID (Sistema Pubblico di Identità Digitale) is a system used by Public Administrations and provate subject
@@ -10,7 +10,7 @@ This PBC let **Entando 7** be certified as SPID Service Provider
 **NOTE:** installing the PBC alone is not sufficient to start the accreditation process: be sure to read the [technical
 documentation](https://docs.italia.it/italia/idp/idp-regole-tecniche/it/stabile/index.html) first and then the whole [certification procedure](https://www.idp.gov.it/cos-e-idp/diventa-fornitore-di-servizi/).
 
-Below the list of the Identity providers currently supported:
+Currently the bundle configures the following identity providers:
 
 | Name of the provider         |
 |------------------------------|
@@ -98,20 +98,11 @@ The procedure is as follows:
  
 When installing in production (or staging) we have two options:
 
-The first step is to prepare Keycloak for the bundle execution; we have two options:  
-
- - [replace the entire Keycloak image](#replace-keycloak-image)
- - [modify the existing Keycloak installation](#modify-existing-keycloak)
+The first step is to prepare Keycloak for the bundle execution; we have two options;  
+so we either [replace the entire Keycloak image](#replace-keycloak-image) OR  [modify the existing Keycloak installation](#modify-existing-keycloak).
 
 **IMPORTANT!** Please be aware that in the latter case the Keycloak theme is not updated so the dynamic list of providers won't be available.  
 The default behaviour of Keycloak in this case is to show a separate button for each SPID identity provider.
-
-
-The next steps are:
-
- - [create the secret containing the configuration of the organization](#create-the-secret-with-organization-data)
- - [create the bundle directory](#create-the-bundle-directory)
- - [install the bundle through the CLI](#installation)
 
 
 ### Replace Keycloak image
@@ -154,18 +145,18 @@ ent k get po -n <NAMESPACE> | grep default-sso-in-namespace-deployment | head -n
 ````
 where NAMESPACE is the namespace where Entando was installed to.
 
-Copy the spid-provider.jar into the Keycloak using the command appropriate for your Keycloak installation:
+Copy the [spid-provider.jar](https://github.com/entando-ps/entando-spid-integration/blob/master/bundle_src/spid-provider.jar) into the Keycloak using the command appropriate for your Keycloak installation:
 
 - Keycloak 15.1.x community edition:
 
 ```shell
-ent k cp bundle_src/spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/jboss/keycloak/standalone/deployments
+ent k cp ./provider/spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/jboss/keycloak/standalone/deployments
 ```
 
 - Red HAT SSO 7:
 
 ```shell
-ent k cp bundle_src/spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/eap/standalone/deployments
+ent k cp ./provider/spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/eap/standalone/deployments
 ```
 
 where `default-sso-in-namespace-deployment-aaabbbccc-dddee` is the name of the Keycloak pod.
@@ -175,6 +166,12 @@ You have to wait a few instants to let Keycloak detect the new provider and inst
 The result of this operation is to add a new identity
 provider, **SPID**, to the list of those already available. This provider will be configured automatically when the bundle is installed.
 For this reason installing the bundle without these preliminary step will result in an error.
+
+Once that Keycloak has been prepared:
+
+- [create the secret containing the configuration of the organization](#create-the-secret-with-organization-data)
+- [install the bundle through the CLI](#installation)
+
 
 ### Create the secret with organization data
 
@@ -197,7 +194,8 @@ Replace the value in the `configure.sh` script and inside the [environment varia
 
 ### Installation
 
-As expected we use the CLI to install in a cluster. The procedure is the same presented [in the official documentation](https://developer.entando.com/v7.1/tutorials/create/pb/publish-project-bundle.html#create-and-deploy-a-bundle-project) so:
+Final users at this point can install the bundle from the [official Entando Hub](https://entando.com/en/hub.page), while the developers can install the bundle using the CLI;  
+the procedure is the same presented [in the official documentation](https://developer.entando.com/v7.1/tutorials/create/pb/publish-project-bundle.html#create-and-deploy-a-bundle-project), so:
 
 ```shell
 ent bundle pack
