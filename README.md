@@ -5,25 +5,26 @@ SPID (Sistema Pubblico di Identità Digitale) is a system used by Public Adminis
 to authenticate a given user.
 
 
-This PBC let **Entando 7** be certified as SPID Service Provider
+This PBC let **Entando 7.x** be certified as SPID Service Provider
 
 **NOTE:** installing the PBC alone is not sufficient to start the accreditation process: be sure to read the [technical
 documentation](https://docs.italia.it/italia/idp/idp-regole-tecniche/it/stabile/index.html) first and then the whole [certification procedure](https://www.idp.gov.it/cos-e-idp/diventa-fornitore-di-servizi/).
 
-Currently the bundle configures the following identity providers:
+Currently, the bundle configures the following identity providers:
 
-| Name of the provider         |
-|------------------------------|
-| Aruba PEC S.p.A.             |
-| In.Te.S.A. S.p.A.            |
-| InfoCert S.p.A.              |
-| Lepida S.c.p.A.              |
-| Namirial S.p.A.              |
-| Poste Italiane S.p.A.        |
-| Register S.p.A.              |
-| Sielte S.p.A.                |
-| TeamSystem S.p.A.            |
-| TI Trust Technologies S.r.l. |
+| Name of the provider   |
+|------------------------|
+| Aruba ID               |
+| EtnaHitech S.C.p.A.    |
+| InfoCamere S.C.p.A.    |
+| Infocert ID            |
+| Intesi Group S.p.A.    |
+| Lepida ID              |
+| Namirial ID            |
+| Sielte ID              |
+| SPIDItalia Register.it |
+| TeamSystem ID.         |
+| Tim ID                 |
 
 **NOTE:** a test IdP will also be created to let the organization validate the general setup of the environment against the [test server](https://demo.spid.gov.it/#/login) 
 made available by the public administration.
@@ -112,13 +113,13 @@ This is ideal for new Entando instances (or when Keycloak configuration can be i
 
 Run the following command to replace Keycloak image
 
-- For Keycloak community 15.1.x:
+- For Keycloak community 18.0.x:
 ```shell
 ent k scale deploy default-sso-in-namespace-deployment --replicas=0
 ent k set image deployment/default-sso-in-namespace-deployment server-container=entandopsdh/spid-keycloak-theme:0.0.2
 ```
 
-- For Red HAT SSO 7:
+- For Red HAT SSO:
 ```shell
 ent k scale deploy default-sso-in-namespace-deployment --replicas=0
 ent k set image deployment/default-sso-in-namespace-deployment server-container=entandopsdh/spid-rhsso-theme:0.0.1
@@ -147,13 +148,13 @@ where NAMESPACE is the namespace where Entando was installed to.
 
 Copy the [spid-provider.jar](https://github.com/entando-ps/entando-spid-integration/blob/master/bundle_src/spid-provider.jar) into the Keycloak using the command appropriate for your Keycloak installation:
 
-- Keycloak 15.1.x community edition:
+- Keycloak 18.0.x community edition:
 
 ```shell
 ent k cp ./provider/spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/jboss/keycloak/standalone/deployments
 ```
 
-- Red HAT SSO 7:
+- Red HAT SSO:
 
 ```shell
 ent k cp ./provider/spid-provider.jar default-sso-in-namespace-deployment-aaabbbccc-dddee:/opt/eap/standalone/deployments
@@ -207,7 +208,8 @@ To build the project
 ent bundle publish
 ```
 
-**NOTE:** append the switches `--registry registry.hub.docker.com --org my-docker-organization` to customize the registry and the organization
+**NOTE:** append the switches `--registry=registry.hub.docker.com --org=my-docker-organization` to customize the registry and the organization.  
+This is mandatory when pushing the bundle image to a new repository.
 
 ```shell
 ent bundle deploy
@@ -230,8 +232,8 @@ Below the list of the currently supported API:
 | Configure | [/api/spid/configure](http://localhost:8081/api/spid/configure)       | POST | Start the configuration process                                                                                                                                                                            | 
 | Revert    | [/api/spid/revert](http://localhost:8081/api/spid/revert)             | POST | Revert the configuration                                                                                                                                                                                   |
 | Status    | [/api/spid/status](http://localhost:8081/api/spid/status)             | GET  | Get the status: if "installed" is true then <br/> the configuration is effective. Remaining fields are the list of providers configured and <br/> whether the custom authentication flow is present or not |
-| Status    | [/api/spid/organization](http://localhost:8081/api/spid/organization) | GET  | Get the actual Organization properties used for the configuration (or that will be used for the configuration)                                                                                             |
-| Status    | [/api/spid/organization](http://localhost:8081/api/spid/organization) | POST | Set the organization properties that will be used for the configuration process                                                                                                                            |
+| organization    | [/api/spid/organization](http://localhost:8081/api/spid/organization) | GET  | Get the actual Organization properties used for the configuration (or that will be used for the configuration)                                                                                             |
+| organization    | [/api/spid/organization](http://localhost:8081/api/spid/organization) | POST | Set the organization properties that will be used for the configuration process                                                                                                                            |
 
 
 For more detailed information access the swagger browser in the [local development environment](http://localhost:8081/swagger-ui/): keep the default client ID and secret and, when requested, use the following credentials on the standard login (not the SPID one!):  
